@@ -24,10 +24,16 @@ e.g. : date and time("2012-12-24T23:59:00") + duration("PT1M") = date and time("
 
 const moment = require('moment-timezone');
 const addProperties = require('./add-properties');
-const { time_ISO_8601, date_ISO_8601, date_time_IANA_tz, types, properties } = require('../../helper/meta');
+const {
+  time_ISO_8601, date_ISO_8601, date_time_IANA_tz, types, properties,
+} = require('../../helper/meta');
 
-const { year, month, day, hour, minute, second, 'time offset': time_offset, timezone } = properties;
-const props = Object.assign({}, { year, month, day, hour, minute, second, 'time offset': time_offset, timezone, type: types.date_and_time, isDateTime: true });
+const {
+  year, month, day, hour, minute, second, 'time offset': time_offset, timezone,
+} = properties;
+const props = {
+  year, month, day, hour, minute, second, 'time offset': time_offset, timezone, type: types.date_and_time, isDateTime: true,
+};
 
 const parseIANATz = (str) => {
   const match = str.match(date_time_IANA_tz);

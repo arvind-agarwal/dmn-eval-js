@@ -5,5 +5,4 @@
 *
 */
 
-module.exports = Object.assign({},
-require('./not'));
+module.exports = { ...require('./not') };

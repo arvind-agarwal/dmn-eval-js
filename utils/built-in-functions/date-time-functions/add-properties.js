@@ -10,16 +10,18 @@ const addProperties = (obj, props) => {
   Object.keys(props).forEach((key) => {
     const value = props[key];
     if (typeof value === 'function') {
-      Object.defineProperty(child, key, { get: function () { // eslint-disable-line object-shorthand
-        const proto = Object.getPrototypeOf(this);
-        return value.call(proto);
-      },
+      Object.defineProperty(child, key, {
+        get: function () { // eslint-disable-line object-shorthand
+          const proto = Object.getPrototypeOf(this);
+          return value.call(proto);
+        },
       });
     } else {
-      Object.defineProperty(child, key, { get: function () { // eslint-disable-line object-shorthand
-        const proto = Object.getPrototypeOf(this);
-        return key !== 'type' && proto[value] ? proto[value]() : value;
-      },
+      Object.defineProperty(child, key, {
+        get: function () { // eslint-disable-line object-shorthand
+          const proto = Object.getPrototypeOf(this);
+          return key !== 'type' && proto[value] ? proto[value]() : value;
+        },
       });
     }
   });

@@ -3,9 +3,10 @@
 *  All Rights Reserved.
 */
 
-module.exports = Object.assign({},
-  require('./contains'),
-  require('./ends-with'),
-  require('./lower-case'),
-  require('./starts-with'),
-  require('./upper-case'));
+module.exports = {
+  ...require('./contains'),
+  ...require('./ends-with'),
+  ...require('./lower-case'),
+  ...require('./starts-with'),
+  ...require('./upper-case'),
+};

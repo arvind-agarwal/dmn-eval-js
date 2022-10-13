@@ -212,7 +212,7 @@ const operatorMap = {
         return valueDTD(x) === valueDTD(y);
       } if (x.isYmd && y.isYmd) {
         return valueYMD(x) === valueYMD(y);
-      } else if (x.isList && y.isList) {
+      } if (x.isList && y.isList) {
         return _.isEqual(x, y);
       }
       throw new Error(`${x.type || typeof x} = ${y.type || typeof y} : operation unsupported for one or more operands types`);

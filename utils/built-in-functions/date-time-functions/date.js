@@ -30,12 +30,16 @@ e.g. : date(2012, 12, 25) = date("2012-12-25")
 
 const moment = require('moment-timezone');
 const addProperties = require('./add-properties');
-const { types, properties, UTC, UTCTimePart, time_ISO_8601, date_ISO_8601 } = require('../../helper/meta');
+const {
+  types, properties, UTC, UTCTimePart, time_ISO_8601, date_ISO_8601,
+} = require('../../helper/meta');
 
 const { year, month, day } = properties;
-const props = Object.assign({}, { year, month, day, type: types.date, isDate: true });
+const props = {
+  year, month, day, type: types.date, isDate: true,
+};
 
-const isNumber = args => args.reduce((prev, next) => prev && typeof next === 'number', true);
+const isNumber = (args) => args.reduce((prev, next) => prev && typeof next === 'number', true);
 
 const parseDate = (str) => {
   try {
@@ -81,7 +85,9 @@ const date = (...args) => {
     }
   } else if (args.length === 3 && isNumber(args)) {
     const [year, month, day] = args;
-    d = moment.tz({ year, month, day, hour: 0, minute: 0, second: 0 }, UTC);
+    d = moment.tz({
+      year, month, day, hour: 0, minute: 0, second: 0,
+    }, UTC);
     if (!d.isValid()) {
       throw new Error('Invalid date. Parsing error while attempting to create date from parts');
     }
@@ -96,4 +102,3 @@ const date = (...args) => {
 };
 
 module.exports = { date };
-

@@ -25,13 +25,21 @@ e.g. : years and months duration(date("2011-12-22"), date("2013-08-24")) = durat
 
 const moment = require('moment');
 const addProperties = require('./add-properties');
-const { ymd_ISO_8601, dtd_ISO_8601, types, properties } = require('../../helper/meta');
+const {
+  ymd_ISO_8601, dtd_ISO_8601, types, properties,
+} = require('../../helper/meta');
 
-const { years, months, days, hours, minutes, seconds } = properties;
-const dtdProps = Object.assign({}, { days, hours, minutes, seconds, type: types.dtd, isDtd: true, isDuration: true });
-const ymdProps = Object.assign({}, { years, months, type: types.ymd, isYmd: true, isDuration: true });
+const {
+  years, months, days, hours, minutes, seconds,
+} = properties;
+const dtdProps = {
+  days, hours, minutes, seconds, type: types.dtd, isDtd: true, isDuration: true,
+};
+const ymdProps = {
+  years, months, type: types.ymd, isYmd: true, isDuration: true,
+};
 
-const isDateTime = args => args.reduce((recur, next) => recur && (next.isDateTime || next.isDate), true);
+const isDateTime = (args) => args.reduce((recur, next) => recur && (next.isDateTime || next.isDate), true);
 
 const daysAndTimeDuration = (...args) => {
   let dtd;
@@ -101,6 +109,5 @@ const duration = (arg) => {
   }
   return result;
 };
-
 
 module.exports = { duration, 'years and months duration': yearsAndMonthsDuration, 'days and time duration': daysAndTimeDuration };

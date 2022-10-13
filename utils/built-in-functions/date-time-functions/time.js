@@ -30,13 +30,19 @@ e.g. : time(“T23:59:00z") = time(23, 59, 0, duration(“PT0H”))
 
 const moment = require('moment-timezone');
 const addProperties = require('./add-properties');
-const { time_ISO_8601, time_IANA_tz, types, properties } = require('../../helper/meta');
+const {
+  time_ISO_8601, time_IANA_tz, types, properties,
+} = require('../../helper/meta');
 const { duration } = require('./duration');
 
-const { hour, minute, second, 'time offset': time_offset, timezone } = properties;
-const props = Object.assign({}, { hour, minute, second, 'time offset': time_offset, timezone, type: types.time, isTime: true });
+const {
+  hour, minute, second, 'time offset': time_offset, timezone,
+} = properties;
+const props = {
+  hour, minute, second, 'time offset': time_offset, timezone, type: types.time, isTime: true,
+};
 
-const isNumber = args => args.reduce((prev, next) => prev && typeof next === 'number', true);
+const isNumber = (args) => args.reduce((prev, next) => prev && typeof next === 'number', true);
 
 const parseTime = (str) => {
   try {

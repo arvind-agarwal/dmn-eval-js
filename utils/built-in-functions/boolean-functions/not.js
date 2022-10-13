@@ -11,7 +11,7 @@ fn is expected to be a curried function with pre-populated x
 fn signature - function(x,y) { // function body  }
 */
 
-const not = fn => (y) => {
+const not = (fn) => (y) => {
   let value = fn(y);
   if (value !== undefined) {
     value = !value;

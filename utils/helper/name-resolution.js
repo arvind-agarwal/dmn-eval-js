@@ -11,8 +11,7 @@ const resolveName = (name, args) => {
   for (const key of nameResolutionOrder) {
     let value;
     if (key === 'plugin') {
-      value =
-        args.context && args.context.plugin && args.context.plugin[name];
+      value = args.context && args.context.plugin && args.context.plugin[name];
     } else {
       value = args[key] && args[key][name];
     }
@@ -20,32 +19,30 @@ const resolveName = (name, args) => {
     if (typeof value !== 'undefined') {
       if (key === 'kwargs' || key === 'context') {
         return value;
-      } else if (key === 'decisionMap') {
+      } if (key === 'decisionMap') {
         if (!isResult) {
           const result = value
-            .build(Object.assign({}, args.context, args.kwargs), {
+            .build({ ...args.context, ...args.kwargs }, {
               decisionMap: args.decisionMap,
               plugin: args.plugin,
             });
           const decisionValue = typeof result === 'object'
-            ? Object.keys(result).map(key => result[key])[0]
+            ? Object.keys(result).map((key) => result[key])[0]
             : result;
           return decisionValue;
-        } else {
-          const decision = {
-            expr: value,
-            isDecision: true,
-          };
-          return decision;
         }
-      } else if (key === 'plugin') {
+        const decision = {
+          expr: value,
+          isDecision: true,
+        };
+        return decision;
+      } if (key === 'plugin') {
         if (typeof value === 'function') {
           // Assumption: functions added to plugins return a promise
           const result = value();
           return { context: result };
-        } else {
-          return value;
         }
+        return value;
       }
       return true;
     }
@@ -53,8 +50,8 @@ const resolveName = (name, args) => {
       return value;
     }
     index++;
-  };
+  }
   // return args.context && args.context[name];
-}
+};
 
 module.exports = resolveName;
