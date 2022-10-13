@@ -18,13 +18,16 @@ function readFile(filename) {
 describe(chalk.blue('Parse and evaluate decision tables'), function() {
 
   it('Parse DRG', function(done) {
-    decisionTable.parseDmnXml(readFile("./test/data/test.dmn")).then(decisions => {
+    const decision = decisionTable.parseDmnXml(readFile("./test/data/test.dmn")).then(decisions => {
       expect(decisions).not.to.be.undefined;
       expect(decisions['decisionPrimary']).not.to.be.undefined;
       expect(decisions['decisionDependent']).not.to.be.undefined;
       expect(decisions['decisionUnknown']).to.be.undefined;
       done();
-    }).catch(err => done(err));
+    }).catch(err => {
+      console.log(err);
+      done(err)
+    } );
   });
 
   it('Parse decision table', function(done) {

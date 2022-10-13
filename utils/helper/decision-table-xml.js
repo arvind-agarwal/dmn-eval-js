@@ -2,7 +2,7 @@
 *  ©2017-2018 HBT Hamburger Berater Team GmbH
 *  All Rights Reserved.
 */
-const DmnModdle = require('dmn-moddle').default;
+const DmnModdle = require('dmn-moddle');
 const logger = require('loglevel').getLogger('dmn-eval-js');
 const moment = require('moment');
 const feel = require('../../dist/feel');
@@ -11,8 +11,8 @@ function createModdle(additionalPackages, options) {
   return new DmnModdle(additionalPackages, options);
 }
 
-function readDmnXml(xml, opts, callback) {
-  return createModdle().fromXML(xml, 'dmn:Definitions', opts, callback);
+async function readDmnXml(xml, opts) {
+  return createModdle().fromXML(xml, 'dmn:Definitions', opts);
 }
 
 function parseRule(rule, idx) {
@@ -126,21 +126,10 @@ function parseDecisions(drgElements) {
   return parsedDecisions;
 }
 
-function parseDmnXml(xml, opts) {
-  return new Promise((resolve, reject) => {
-    readDmnXml(xml, opts, (err, dmnContent) => {
-      if (err) {
-        reject(err);
-      } else {
-        try {
-          const decisions = parseDecisions(dmnContent.drgElement);
-          resolve(decisions);
-        } catch (err) {
-          reject(err);
-        }
-      }
-    });
-  });
+async function parseDmnXml(xml, opts) {
+  const dmnContent = await readDmnXml(xml, opts);
+  const decisions = parseDecisions(dmnContent?.rootElement?.drgElement);
+  return decisions;
 }
 
 function resolveExpression(expression, obj) {

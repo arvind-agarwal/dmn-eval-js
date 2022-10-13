@@ -5,7 +5,51 @@
 *
 */
 
+const { forEach } = require('lodash');
 const _ = require('lodash');
+
+
+// Get a property with dot notation in an object tree
+function getProperty(o, p) {
+  if(!p || !p?.split) return;
+  const ps = p.split(",");
+  let pv = o;
+  ps.forEach(m => {
+    if(pv === undefined || pv === null) return;
+    const cv = pv[m];
+    pv = cv;
+  })
+  return pv;
+}
+
+// valueToFilter - will contain member name, deeper object can be accessed using . notation but not arrays
+// returnMember - In case we need resulting array to be flattend with single property name of the property
+// comparison Operator = > < <= >= 
+const filterList = (list, propertyToSearch, comparsionOperator, valueToFilter, returnMember ) => {
+  if(list === undefined || list === null) return list;
+  if(propertyToSearch === undefined || propertyToSearch === null) return false;
+  if(!Array.isArray(list)) throw new Error('operation unsupported on element of this type');
+  if(!comparsionOperator || comparsionOperator==="=") comparsionOperator = "==";
+  const operatorMap = require('../../helper/fn-generator');
+
+  // list.filter(item => item[propertyToSearch] === valueToFilter ) 
+  const resultArray = [];
+  list.forEach(item => {
+    const propValue = getProperty(item, propertyToSearch);
+    let comparisonResult = false;
+    comparisonResult = operatorMap(comparsionOperator)(propValue, valueToFilter);
+
+    if(comparisonResult) {
+      if(returnMember) {
+        const value = getProperty(item, returnMember);
+        resultArray.push(value);
+      } else {
+        resultArray.push(item);
+      }
+    }
+  });
+  return resultArray;
+};
 
 const listContains = (list, element) => {
   if (list === undefined || list === null) {
@@ -238,4 +282,5 @@ module.exports = {
   union,
   'distinct values': distinctValues,
   flatten,
+  'filterlist': filterList
 };

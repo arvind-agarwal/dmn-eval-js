@@ -11,6 +11,64 @@ const FEEL = require('../dist/feel');
 
 describe(chalk.blue('Built-in list functions tests'), function() {
 
+  it('should support list filterlist function', function() {
+    let context = { list: [{formCode: "profile", toolkitCode: "ba"},{formCode: "strategy", toolkitCode: "ba"}] };
+    
+    let condition = "[1,2,3,4,5]";
+    let parsedGrammar = FEEL.parse(condition);
+    let result = parsedGrammar.build(context);
+    expect(result).to.eql([1,2,3,4,5]);
+
+    // condition = "some i in [1, 2, 3, 4, 5] satisfies i > 4";
+    condition = "some i in [1, 2, 3, 4, 5] satisfies i > 4";
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.be.true;
+
+    condition = "some i in [1, 2, 3, 4, 5] satisfies i  >= 10";
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.be.false;
+
+    condition = 'some i in list satisfies i.toolkitCode = "ba"';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.be.true;
+
+    condition = 'every i in list satisfies i.formCode = "profile"';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.be.false;
+
+    condition = 'every i in list satisfies i.toolkitCode = "ba"';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.be.true;
+
+    condition = 'filterlist(list, "formCode" ,"==","profile", "formCode")';
+    parsedGrammar = FEEL.parse(condition);
+
+    result = parsedGrammar.build(context);
+    expect(result).to.eql(['profile']);
+
+    result = parsedGrammar.build({list: []});
+    expect(result).to.eql([]);
+
+    result = parsedGrammar.build({list: null});
+    expect(result).to.eql(null);
+
+    condition = 'filterlist(list, "toolkitCode", "=","ba","")';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.eql(context.list);
+
+    condition = 'filterlist(list, "toolkitCode", "=", "ba", "")';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.eql(context.list);
+});
+
+
   it('should support list contains function', function() {
       const condition = 'list contains(list, element)';
       const parsedGrammar = FEEL.parse(condition);

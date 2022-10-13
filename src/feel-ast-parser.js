@@ -270,4 +270,50 @@ module.exports = function (ast) {
     operator = operator !== '=' ? operator : '==';
     return fnGen(operator)(results[0])(results[1]);
   };
+
+  ast.InExpressionNode.prototype.build = function (args) {
+    const [variable, list] = [this.name.build(null, false), this.expr.build(args)];
+    if (!Array.isArray(list)) throw new Error("'In Expression' expects an array to operate on");
+    const obj = { list, variable };
+    return obj;
+  };
+
+  ast.QuantifiedExpressionNode.prototype.build = function (args) {
+    const evalSatisfies = (argsNew) => this.expr.build(argsNew);
+    const listArgsReduceCb = (variables) => (res, arg, i) => {
+      const objectWithNewProperty = {};
+      objectWithNewProperty[variables[i]] = arg;
+      return { ...res, ...objectWithNewProperty };
+    };
+    const zipListsCb = (variables) => (...listArgs) => {
+      const obj = listArgs.reduce(listArgsReduceCb(variables), {});
+      const argsNew = addKwargs(listArgs, obj);
+      return evalSatisfies({ ...args, ...argsNew });
+    };
+    const zipLists = (variables, lists) => _.zipWith(...lists, zipListsCb(variables));
+    const processLists = (variables, lists) => zipLists(variables, lists);
+
+    const exprs = this.inExprs.map((d) => d.build(args));
+    const variables = exprs.map((expr) => expr.variable);
+    const lists = exprs.map((expr) => expr.list);
+    const results = processLists(variables, lists);
+    const truthy = results.filter((d) => Boolean(d) === true).length;
+
+    // log.debug(options, `QuantifiedExpressionNode - truthy length - ${truthy}, results length - ${results.length}`);
+    // rlog.debug(options, 'QuantifiedExpressionNode build success', this.rule, this.text, `Truthy length: ${truthy}, Results length: ${results.length}`);
+    if (this.quantity === 'some') return Boolean(truthy);
+    return truthy === results.length;
+  };
+
+  ast.ListNode.prototype.build = function (args) {
+    // const options = (args && args.context && args.context.options) || {};
+    if (this.exprList && this.exprList.length) {
+      const result = this.exprList.map((d) => d.build(args));
+      // log.debug(options, `ListNode - build success with result - ${stringify(result)}, text: ${this.text}`);
+      // rlog.debug(options, 'ListNode build success', this.rule, this.text, stringify(result));
+      return result;
+    }
+    // log.warn(options, 'ListNode - No expression found');
+    return [];
+  };
 };

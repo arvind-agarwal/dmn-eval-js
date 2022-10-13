@@ -5,6 +5,7 @@
 *
 */
 
+
 const ast = {};
 
 /* Begin AST Node Constructors */
@@ -117,30 +118,6 @@ function ComparisonExpressionNode(operator, expr1, expr2, expr3, loc) {
   this.loc = loc;
 }
 
-function InExpressionNode(name, expr, loc, text, rule) {
-  this.type = 'InExpression';
-  this.name = name;
-  this.expr = expr;
-  this.loc = loc; this.text = text;
-  this.rule = rule;
-}
-
-function QuantifiedExpressionNode(quantity, inExprs, expr, loc, text, rule) {
-  this.type = 'QuantifiedExpression';
-  this.quantity = quantity;
-  this.inExprs = inExprs;
-  this.expr = expr;
-  this.loc = loc; this.text = text;
-  this.rule = rule;
-}
-
-function ListNode(exprList, loc, text, rule) {
-  this.type = 'List';
-  this.exprList = exprList;
-  this.loc = loc; this.text = text;
-  this.rule = rule;
-}
-
 /* End AST Node Constructors */
 
 /* Expose the AST Node Constructors */
@@ -160,8 +137,5 @@ ast.DecimalNumberNode = DecimalNumberNode;
 ast.FunctionInvocationNode = FunctionInvocationNode;
 ast.PositionalParametersNode = PositionalParametersNode;
 ast.ComparisonExpressionNode = ComparisonExpressionNode;
-ast.InExpressionNode = InExpressionNode;
-ast.QuantifiedExpressionNode = QuantifiedExpressionNode;
-ast.ListNode = ListNode;
 
 module.exports = ast;

@@ -12,6 +12,23 @@ const ast = require('./feel-ast');
 // adding build methods to prototype of each constructor
 require('./feel-ast-parser')(ast);
 
+function log(value) {
+  // empty function
+  // console.log(value);
+}
+
+
+let initialized = false;
+let ruleName = 'default';
+
+function rule() {
+  if (!initialized) {
+    ruleName = options.ruleName
+    initialized = true
+  }
+  return ruleName;
+}
+
 function extractOptional(optional, index) {
   return optional ? optional[index] : null;
 }

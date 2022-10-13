@@ -1,17 +1,19 @@
 Start
     = __ program:(ExpressionOrTests __)?
         {
-            return new ast.ProgramNode(extractOptional(program,0),location());
+            return new ast.ProgramNode(extractOptional(program,0),location(),text(), rule());
         }
 
 ExpressionOrTests
-	= SimpleExpression
+	= Expression
 	/ SimpleUnaryTests
 
 
 // 1.
 Expression
     = SimpleExpression
+    / QuantifiedExpression
+    / BoxedExpression
 
 // 4.
 ArithmeticExpression
@@ -346,6 +348,10 @@ Keyword
     / FalseToken
     / NullToken
     / NotToken
+    / SomeToken
+    / EveryToken
+    / InToken
+    / SatisfiesToken
 
 DateTimeKeyword
   = "date and time"               !NamePartChar
@@ -388,8 +394,49 @@ NullLiteral
             return new ast.LiteralNode(null, location());
         }
 
-NullToken       =   "null"                              !NamePartChar
+InExpressions
+    = head:InExpression tail:(__ "," __ InExpression)*
+        {
+            log(`InExpressions (${text()})`);
+            return buildList(head,tail,3);
+        }
 
+InExpression
+    = head:Name __ InToken __ tail:Expression
+        {
+            log(`InExpression (${text()})`);
+            return new ast.InExpressionNode(head,tail,location(), text(), rule());
+        }
+
+QuantifiedExpression
+    = quantity:$(SomeToken/EveryToken) WhiteSpace+ head:InExpressions __ $SatisfiesToken __ tail:Expression
+        {
+            log(`QuantifiedExpression (${text()})`);
+            return new ast.QuantifiedExpressionNode(quantity,head,tail,location(), text(), rule());
+        }
+
+BoxedExpression
+    = List
+
+List
+    = "[" __ list:ListEntries? __ "]"
+        {
+            log(`List (${text()})`);
+            return new ast.ListNode(list,location(), text(), rule());
+        }
+
+ListEntries
+    = head:Expression tail:(__ "," __ Expression)*
+      {
+        log(`ListEntries (${text()})`);
+        return buildList(head,tail,3);
+      }
+
+NullToken       =   "null"                              !NamePartChar
+SomeToken       =   "some"                              !NamePartChar
+EveryToken      =   "every"                             !NamePartChar
+SatisfiesToken  =   "satisfies"                         !NamePartChar
+InToken         =   "in"                                !NamePartChar
 __
     = (WhiteSpace)*
 

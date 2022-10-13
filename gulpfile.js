@@ -62,22 +62,22 @@ gulp.task('concat:feel', gulp.series('initialize:feel', () => gulp.src(['./temp/
 
 
 gulp.task('clean:temp', gulp.series('initialize:feel', 'concat:feel', () => gulp.src('./temp', {
-  read: false,
+  allowEmpty: true, read: false,
 })
 		.pipe(clean())));
 
 gulp.task('clean:dist:feel', gulp.series('src:lint', () => gulp.src('./dist/feel.js', {
-  read: false,
+  allowEmpty: true,read: false,
 })
 		.pipe(clean())));
 
 gulp.task('clean:dist:feel:ast', gulp.series('src:lint', () => gulp.src('./dist/feel-ast*.js', {
-  read: false,
+  allowEmpty: true, read: false,
 })
 		.pipe(clean())));
 
 gulp.task('clean:src:feel', () => gulp.src('./src/feel.pegjs', {
-  read: false,
+  allowEmpty: true, read: false,
 })
 		.pipe(clean()));
 
@@ -97,7 +97,7 @@ gulp.task('dist:feel:ast:parser', gulp.series('clean:dist:feel:ast', () => gulp.
 
 
 gulp.task('mocha', () => gulp.src(['test/*.js'], {
-  read: false,
+  allowEmpty: true, read: false,
 })
 		.pipe(mocha({
   reporter: 'list',
