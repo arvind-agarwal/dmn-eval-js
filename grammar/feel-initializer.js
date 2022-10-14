@@ -14,7 +14,7 @@ require('./feel-ast-parser')(ast);
 
 function log(value) {
   // empty function
-  // console.log(value);
+  // console.log("feel-initializer",value);
 }
 
 
@@ -59,5 +59,18 @@ function buildComparisonExpression(head, tail, loc) {
   return tail.reduce((result, element) => {
     const operator = Array.isArray(element[1]) ? element[1][0] : element[1];
     return new ast.ComparisonExpressionNode(operator, result, element[3], null, loc);
+  }, head);
+}
+
+function buildLogicalExpression(head, tail, loc, text, rule) {
+  //log('_buildLogicalExpression');
+  return tail.reduce((result, element) => {
+    let operator = element[1];
+    if (operator === 'and') {
+      operator = '&&';
+    } else if (operator === 'or') {
+      operator = '||';
+    }
+    return new ast.LogicalExpressionNode(operator, result, element[3], loc, text, rule);
   }, head);
 }

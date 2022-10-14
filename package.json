@@ -12,7 +12,8 @@
     "precommit-msg": "echo 'Pre-commit checks...' && exit 0"
   },
   "pre-commit": [
-    "precommit-msg"
+    "precommit-msg",
+    "lint"
   ],
   "engines": {
     "node": ">=6.9.2"

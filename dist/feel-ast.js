@@ -108,13 +108,24 @@ function PositionalParametersNode(params, loc) {
   this.loc = loc;
 }
 
-function ComparisonExpressionNode(operator, expr1, expr2, expr3, loc) {
+function ComparisonExpressionNode(operator, expr1, expr2, expr3, loc, text, rule) {
   this.type = 'ComparisonExpression';
   this.operator = operator;
   this.expr_1 = expr1;
   this.expr_2 = expr2;
   this.expr_3 = expr3;
   this.loc = loc;
+  this.text = text;
+  this.rule = rule;
+}
+
+function LogicalExpressionNode(operator, expr1, expr2, loc, text, rule) {
+  this.type = 'LogicalExpression';
+  this.operator = operator;
+  this.expr_1 = expr1;
+  this.expr_2 = expr2;
+  this.loc = loc; this.text = text;
+  this.rule = rule;
 }
 
 function InExpressionNode(name, expr, loc, text, rule) {
@@ -163,5 +174,6 @@ ast.ComparisonExpressionNode = ComparisonExpressionNode;
 ast.InExpressionNode = InExpressionNode;
 ast.QuantifiedExpressionNode = QuantifiedExpressionNode;
 ast.ListNode = ListNode;
+ast.LogicalExpressionNode = LogicalExpressionNode;
 
 module.exports = ast;

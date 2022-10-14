@@ -250,25 +250,59 @@ module.exports = function (ast) {
     return results;
   };
 
+  // ast.ComparisonExpressionNode.prototype.build = function (args) {
+  //   let { operator } = this;
+  //   if (operator === 'between') {
+  //     const results = [this.expr_1, this.expr_2, this.expr_3].map((d) => d.build(args));
+  //     if ((results[0] >= results[1]) && (results[0] <= results[2])) {
+  //       return true;
+  //     }
+  //     return false;
+  //   } if (operator === 'in') {
+  //     const processExpr = (operand) => {
+  //       this.expr_2 = Array.isArray(this.expr_2) ? this.expr_2 : [this.expr_2];
+  //       const tests = this.expr_2.map((d) => d.build(args));
+  //       return tests.map((test) => test(operand)).reduce((accu, next) => accu || next, false);
+  //     };
+  //     return processExpr(this.expr_1.build(args));
+  //   }
+  //   const results = [this.expr_1, this.expr_2].map((d) => d.build(args));
+  //   operator = operator !== '=' ? operator : '==';
+  //   return fnGen(operator)(results[0])(results[1]);
+  // };
+
   ast.ComparisonExpressionNode.prototype.build = function (args) {
+    // const options = (args && args.context && args.context.options) || {};
     let { operator } = this;
     if (operator === 'between') {
       const results = [this.expr_1, this.expr_2, this.expr_3].map((d) => d.build(args));
+      let result;
       if ((results[0] >= results[1]) && (results[0] <= results[2])) {
-        return true;
+        result = true;
+      } else {
+        result = false;
       }
-      return false;
-    } if (operator === 'in') {
+      // log.debug(options, `ComparisionExpressionNode - between - build success with result - ${stringify(result)}, text: ${this.text}`);
+      // rlog.debug(options, 'ComparisionExpressionNode build success (between)', this.rule, this.text, stringify(result));
+      return result;
+    }
+    if (operator === 'in') {
       const processExpr = (operand) => {
         this.expr_2 = Array.isArray(this.expr_2) ? this.expr_2 : [this.expr_2];
         const tests = this.expr_2.map((d) => d.build(args));
-        return tests.map((test) => test(operand)).reduce((accu, next) => accu || next, false);
+        const result = tests.map((test) => test(operand)).reduce((accu, next) => accu || next, false);
+        return result;
       };
-      return processExpr(this.expr_1.build(args));
+      const operand = this.expr_1.build(args);
+      const result = processExpr(operand);
+      return result;
     }
     const results = [this.expr_1, this.expr_2].map((d) => d.build(args));
     operator = operator !== '=' ? operator : '==';
-    return fnGen(operator)(results[0])(results[1]);
+    const result = fnGen(operator)(results[0])(results[1]);
+    // log.debug(options, `ComparisionExpressionNode build success with result - ${stringify(result)}, text: ${this.text}`);
+    // rlog.debug(options, 'ComparisionExpressionNode build sucess', this.rule, this.text, stringify(result));
+    return result;
   };
 
   ast.InExpressionNode.prototype.build = function (args) {
@@ -315,5 +349,17 @@ module.exports = function (ast) {
     }
     // log.warn(options, 'ListNode - No expression found');
     return [];
+  };
+
+  ast.LogicalExpressionNode.prototype.build = function (args) {
+    // const options = (args && args.context && args.context.options) || {};
+    const results = [this.expr_1.build(args), this.expr_2.build(args)];
+    const res = [];
+    res[0] = results[0] || Boolean(results[0]); // to handle null and undefined
+    res[1] = results[1] || Boolean(results[1]); // to handle null and undefined
+    const result = fnGen(this.operator)(res[0])(res[1]);
+    // log.debug(options, `LogicalExpressionNode build success with result - ${stringify(result)}, text: ${this.text}`);
+    // rlog.debug(options, 'LogicalExpressionNode build success', this.rule, this.text, stringify(result));
+    return result;
   };
 };

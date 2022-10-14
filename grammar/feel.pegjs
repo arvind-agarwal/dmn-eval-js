@@ -11,9 +11,29 @@ ExpressionOrTests
 
 // 1.
 Expression
-    = SimpleExpression
-    / QuantifiedExpression
+    = TextualExpression
     / BoxedExpression
+
+TextualExpression
+    = TxtExpa // function definition | for expression | if expression | quantified expression |
+    / TxtExpb // Disjunction
+    / TxtExpc // Conjunction
+    / TxtExpd // Comparison
+    / TxtExpe // ArithmeticExpression
+    / TxtExpi // literal | simple positive unary test | name | "(" , textual expression , ")"
+
+TxtExpa
+    = QuantifiedExpression
+
+TxtExpi
+	="(" __ expr:TextualExpression __ ")"
+		{
+      log(`TxtExpi (${text()})`);
+			return expr;
+		}
+    / SimpleValue
+	/ SimplePositiveUnaryTest
+
 
 // 4.
 ArithmeticExpression
@@ -352,6 +372,9 @@ Keyword
     / EveryToken
     / InToken
     / SatisfiesToken
+    / AndToken
+    / OrToken
+    / BetweenToken
 
 DateTimeKeyword
   = "date and time"               !NamePartChar
@@ -359,10 +382,33 @@ DateTimeKeyword
   / "date"                        !NamePartChar
   / "duration"                    !NamePartChar
 
+
+TxtExpd
+	= Comparison
+
+LeftExpd
+	= TxtExpe
+	/ LeftExpe
+
+TxtExpe
+	= ArithmeticExpression
+
+LeftExpe
+	= TxtExpi
+
 // 51.
 Comparison
-	= head:NonRecursiveSimpleExpressionForComparison tail:(__ ComparisonOperator __ Expression)+
-	  { return buildComparisonExpression(head,tail,location()); }
+	= head:LeftExpd tail:(__ ComparisonOperator __ LeftExpd)+
+	  { log(`Comparison:1 (${text()})`);return buildComparisonExpression(head,tail,location(), text(), rule()); }
+	/ head:LeftExpd __ operator:$BetweenToken __ first:LeftExpd __ and:AndToken __ second:LeftExpd
+        {
+            log(`Comparison:2 (${text()})`);
+            return new ast.ComparisonExpressionNode(operator,head,first,second,location(), text(), rule());
+        }
+ 
+
+//	= head:NonRecursiveSimpleExpressionForComparison tail:(__ ComparisonOperator __ Expression)+
+//	  { return buildComparisonExpression(head,tail,location()); }
 
 NonRecursiveSimpleExpressionForComparison
 	= ArithmeticExpression
@@ -375,6 +421,36 @@ ComparisonOperator
     / "<="
     / $">" !"="
     / ">="
+
+TxtExpb
+	= Disjunction
+
+LeftExpb
+	= TxtExpc
+	/ LeftExpc
+
+TxtExpc
+	= Conjunction
+
+LeftExpc
+	= TxtExpd
+	/ LeftExpd
+
+Conjunction
+	= head:LeftExpc tail:(__ $AndToken __ LeftExpc)+
+		{
+      log(`Conjunction (${text()})`);
+			return buildLogicalExpression(head,tail,location(), text(), rule());
+		}
+
+Disjunction
+	= head:LeftExpb tail:(__ $OrToken __ LeftExpb)+
+		{
+      log(`Disjunction (${text()})`);
+			return buildLogicalExpression(head,tail,location(), text(), rule());
+		}
+
+
 
 FunctionInvocation
     = fnName:QualifiedName __ "(" params:(__ (PositionalParameters))? __ ")"
@@ -437,6 +513,9 @@ SomeToken       =   "some"                              !NamePartChar
 EveryToken      =   "every"                             !NamePartChar
 SatisfiesToken  =   "satisfies"                         !NamePartChar
 InToken         =   "in"                                !NamePartChar
+AndToken        =   "and"                               !NamePartChar
+OrToken         =   "or"                                !NamePartChar
+BetweenToken    =   "between"                           !NamePartChar
 __
     = (WhiteSpace)*
 
