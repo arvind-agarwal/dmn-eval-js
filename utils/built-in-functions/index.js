@@ -13,5 +13,5 @@ const string = require('./string-functions');
 const number = require('./numeric-functions');
 
 module.exports = {
-  ...dateTime, ...list, ...boolean, ...defined, ...string, ...number
+  ...dateTime, ...list, ...boolean, ...defined, ...string, ...number,
 };
