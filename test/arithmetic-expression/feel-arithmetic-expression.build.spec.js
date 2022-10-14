@@ -9,30 +9,39 @@ var chai = require('chai');
 var expect = chai.expect;
 var FEEL = require('../../dist/feel');
 
-describe(chalk.blue('Arithmetic expression ast parsing test'), function() {
-    it('Successfully builds ast from simple arithmetic expression', function() {
-        var text = 'a + b - c';
-        var _context = {
-            a: 10,
-            b: 20,
-            c: 5
-        };
-        var parsedGrammar = FEEL.parse(text);
-        expect(parsedGrammar.build(_context)).to.equal(25);
-    });
+describe(chalk.blue('Arithmetic expression ast parsing test'), function () {
 
-    it('Successfully builds ast from simple arithmetic comparison', function() {
-      var text = '< a + b';
-      var _context = {
-        a: 10,
-        b: 20,
-      };
-      var parsedGrammar = FEEL.parse(text, { startRule: 'SimpleUnaryTests' });
-      const result = parsedGrammar.build(_context);
-      expect(result).not.to.be.undefined;
-      expect(result(29)).to.be.true;
-      expect(result(30)).to.be.false;
-    });
+  it('Successfully builds ast from arithmetic expression', function () {
+    let parsedGrammar = FEEL.parse("round(26.222)");
+    expect(parsedGrammar.build({})).to.equal(26);
+
+    parsedGrammar = FEEL.parse("round(26.28933,2)")
+    expect(parsedGrammar.build({})).to.equal(26.29);
+  });
+
+  it('Successfully builds ast from simple arithmetic expression', function () {
+    var text = 'a + b - c';
+    var _context = {
+      a: 10,
+      b: 20,
+      c: 5
+    };
+    var parsedGrammar = FEEL.parse(text);
+    expect(parsedGrammar.build(_context)).to.equal(25);
+  });
+
+  it('Successfully builds ast from simple arithmetic comparison', function () {
+    var text = '< a + b';
+    var _context = {
+      a: 10,
+      b: 20,
+    };
+    var parsedGrammar = FEEL.parse(text, { startRule: 'SimpleUnaryTests' });
+    const result = parsedGrammar.build(_context);
+    expect(result).not.to.be.undefined;
+    expect(result(29)).to.be.true;
+    expect(result(30)).to.be.false;
+  });
 
   /* this test currently fails - TODO: fix the grammar with respect to arithmetic expressions
   it('Successfully builds ast from arithmetic expression with correct operator precedence', function() {
@@ -68,14 +77,16 @@ describe(chalk.blue('Arithmetic expression ast parsing test'), function() {
   });
   */
 
-  it('Successfully builds ast from arithmetic expression', function() {
-      var text = '1-(1+rate/12)**-term';
-      var _context = {
-          rate: 12,
-          term: 5
-      };
-      var parsedGrammar = FEEL.parse(text);
-      expect(parsedGrammar.build(_context)).to.equal(0.96875);
+  it('Successfully builds ast from arithmetic expression', function () {
+    var text = '1-(1+rate/12)**-term';
+    var _context = {
+      rate: 12,
+      term: 5
+    };
+    var parsedGrammar = FEEL.parse(text);
+    expect(parsedGrammar.build(_context)).to.equal(0.96875);
   });
+
+
 
 });

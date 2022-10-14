@@ -10,7 +10,8 @@ const list = require('./list-functions');
 const boolean = require('./boolean-functions');
 const defined = require('./defined');
 const string = require('./string-functions');
+const number = require('./numeric-functions');
 
 module.exports = {
-  ...dateTime, ...list, ...boolean, ...defined, ...string,
+  ...dateTime, ...list, ...boolean, ...defined, ...string, ...number
 };
