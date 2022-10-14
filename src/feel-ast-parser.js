@@ -362,4 +362,49 @@ module.exports = function (ast) {
     // rlog.debug(options, 'LogicalExpressionNode build success', this.rule, this.text, stringify(result));
     return result;
   };
+
+  ast.ForExpressionNode.prototype.build = function (args) {
+    // const options = (args && args.context && args.context.options) || {};
+    const evalSatisfies = (argsNew) => this.expr.build(argsNew);
+    const listArgsReduceCb = (variables) => (res, arg, i) => {
+      const objectWithNewProperty = {};
+      objectWithNewProperty[variables[i]] = arg;
+      return { ...res, ...objectWithNewProperty };
+    };
+
+    const zipListsCb = (variables) => (...listArgs) => {
+      const obj = listArgs.reduce(listArgsReduceCb(variables), {});
+      const argsNew = addKwargs(listArgs, obj);
+      return evalSatisfies({ ...args, ...argsNew });
+    };
+
+    const zipLists = (variables, lists) => _.zipWith(...lists, zipListsCb(variables));
+
+    const processLists = (variables, lists) => zipLists(variables, lists);
+
+    const exprs = this.inExprs.map((d) => d.build(args));
+    const variables = exprs.map((expr) => expr.variable);
+    const lists = exprs.map((expr) => expr.list);
+    // log.debug(options, `ForExpressionNode: variables - ${variables}, lists - ${lists}`);
+    // rlog.debug(options, 'ForExpressionNode build success', this.rule, this.text, `variables: ${variables}, list: ${lists}`);
+    const result = processLists(variables, lists);
+    return result;
+    // log.debug(options, `ForExpressionNode build success with result - ${stringify(result)}, text: ${this.text}`);
+    // rlog.debug(options, 'ForExpressionNode build success', this.rule, this.text, stringify(result));
+  };
+
+  ast.IfExpressionNode.prototype.build = function (args) {
+    // const options = (args && args.context && args.context.options) || {};
+    const condition = this.condition.build(args);
+    // log.debug(options, `IfExpressionNode - condition - ${condition}`);
+    let result;
+    if (condition) {
+      result = this.thenExpr.build(args);
+    } else {
+      result = this.elseExpr.build(args);
+    }
+    // log.debug(options, `IfExpressionNode build success with result - ${stringify(result)}, text: ${this.text}`);
+    // rlog.debug(options, 'IfExpressionNode build success', this.rule, this.text, stringify(result));
+    return result;
+  };
 };

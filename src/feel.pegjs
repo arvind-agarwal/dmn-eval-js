@@ -102,6 +102,8 @@ TextualExpression
 
 TxtExpa
     = QuantifiedExpression
+    / ForExpression
+    / IfExpression
 
 TxtExpi
 	="(" __ expr:TextualExpression __ ")"
@@ -453,6 +455,11 @@ Keyword
     / AndToken
     / OrToken
     / BetweenToken
+    / ForToken
+    / ReturnToken
+    / IfToken
+    / ThenToken
+    / ElseToken
 
 DateTimeKeyword
   = "date and time"               !NamePartChar
@@ -569,6 +576,20 @@ QuantifiedExpression
             return new ast.QuantifiedExpressionNode(quantity,head,tail,location(), text(), rule());
         }
 
+ForExpression
+    = $ForToken __ head:InExpressions __ $ReturnToken __ tail:Expression
+        {
+            log(`ForExpression (${text()})`);
+            return new ast.ForExpressionNode(head,tail,location(), text(), rule());
+        }
+
+IfExpression
+    = $IfToken __ condition:Expression __ $ThenToken __ thenExpr:Expression __ $ElseToken __ elseExpr:Expression
+        {
+            log(`IfExpression (${text()})`);
+            return new ast.IfExpressionNode(condition,thenExpr,elseExpr,location(), text(), rule());
+        }
+
 BoxedExpression
     = List
 
@@ -594,6 +615,11 @@ InToken         =   "in"                                !NamePartChar
 AndToken        =   "and"                               !NamePartChar
 OrToken         =   "or"                                !NamePartChar
 BetweenToken    =   "between"                           !NamePartChar
+ForToken        =   "for"                               !NamePartChar
+ReturnToken     =   "return"                            !NamePartChar
+IfToken         =   "if"                                !NamePartChar
+ThenToken       =   "then"                              !NamePartChar
+ElseToken       =   "else"                              !NamePartChar
 __
     = (WhiteSpace)*
 

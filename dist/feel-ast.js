@@ -152,6 +152,24 @@ function ListNode(exprList, loc, text, rule) {
   this.rule = rule;
 }
 
+function ForExpressionNode(inExprs, expr, loc, text, rule) {
+  this.type = 'ForExpression';
+  this.inExprs = inExprs;
+  this.expr = expr;
+  this.loc = loc; this.text = text;
+  this.rule = rule;
+}
+
+function IfExpressionNode(condition, thenExpr, elseExpr, loc, text, rule) {
+  this.type = 'IfExpression';
+  this.condition = condition;
+  this.thenExpr = thenExpr;
+  this.elseExpr = elseExpr;
+  this.loc = loc; this.text = text;
+  this.rule = rule;
+}
+
+
 /* End AST Node Constructors */
 
 /* Expose the AST Node Constructors */
@@ -175,5 +193,7 @@ ast.InExpressionNode = InExpressionNode;
 ast.QuantifiedExpressionNode = QuantifiedExpressionNode;
 ast.ListNode = ListNode;
 ast.LogicalExpressionNode = LogicalExpressionNode;
+ast.ForExpressionNode = ForExpressionNode;
+ast.IfExpressionNode = IfExpressionNode;
 
 module.exports = ast;

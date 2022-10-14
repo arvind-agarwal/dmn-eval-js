@@ -9,22 +9,47 @@ chai.use(assertArrays);
 const expect = chai.expect;
 const FEEL = require('../dist/feel');
 
-describe(chalk.blue('Built-in list functions tests'), function() {
+describe(chalk.blue('Built-in list functions tests'), function () {
 
-  it('should support list filterlist function', function() {
-    let context = { list: [{formCode: "profile", toolkitCode: "ba"},{formCode: "strategy", toolkitCode: "ba"}] };
-    
+  it('should support if expression', function() {
+    let context = { l1: [{ formCode: "profile", toolkitCode: "ba" }, { formCode: "strategy", toolkitCode: "ba" }] };
+
+    let condition = 'if l1.length >= 2 then "LENMORETHAN2" else "LENLESSTHANTWO"';
+    let parsedGrammar = FEEL.parse(condition);
+    let result = parsedGrammar.build(context);
+    expect(result).to.equal('LENMORETHAN2');
+
+    condition = 'if l1.length >= 2 and (some item in l1 satisfies item.formCode="profile1") then "LENMORETHAN2" else "LENLESSTHANTWO"';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.equal('LENLESSTHANTWO');
+
+  });
+
+  it('should support list filterlist function', function () {
+    let context = { l1: [{ formCode: "profile", toolkitCode: "ba" }, { formCode: "strategy", toolkitCode: "ba" }] };
+
     let condition = "[1,2,3,4,5]";
     let parsedGrammar = FEEL.parse(condition);
     let result = parsedGrammar.build(context);
-    expect(result).to.eql([1,2,3,4,5]);
+    expect(result).to.eql([1, 2, 3, 4, 5]);
 
-    condition = "list";
+    condition = 'for i in [1, 2, 3, 4, 5] return i * i';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.eql([1, 4, 9, 16, 25]);
+
+    condition = 'for i in l1 return i.formCode';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.eql(["profile","strategy"]);
+
+    condition = "l1";
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
     expect(result).not.to.be.undefined;
 
-    condition = "list.length";
+    condition = "l1.length";
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
     expect(result).to.equal(2);
@@ -40,75 +65,75 @@ describe(chalk.blue('Built-in list functions tests'), function() {
     result = parsedGrammar.build(context);
     expect(result).to.be.false;
 
-    condition = 'some i in list satisfies i.toolkitCode = "ba"';
+    condition = 'some i in l1 satisfies i.toolkitCode = "ba"';
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
     expect(result).to.be.true;
 
-    condition = 'every i in list satisfies i.formCode = "profile"';
+    condition = 'every i in l1 satisfies i.formCode = "profile"';
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
     expect(result).to.be.false;
 
-    condition = 'every i in list satisfies i.toolkitCode = "ba"';
+    condition = 'every i in l1 satisfies i.toolkitCode = "ba"';
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
     expect(result).to.be.true;
 
-    condition = 'every i in list satisfies i.toolkitCode = "ba" and i.formCode = "profile"';
+    condition = 'every i in l1 satisfies i.toolkitCode = "ba" and i.formCode = "profile"';
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
     expect(result).to.be.false;
 
-    condition = 'every i in list satisfies i.toolkitCode = "ba" and i.formCode != "profile1"';
+    condition = 'every i in l1 satisfies i.toolkitCode = "ba" and i.formCode != "profile1"';
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
     expect(result).to.be.true;
 
-    condition = 'filterlist(list, "formCode" ,"==","profile", "formCode")';
+    condition = 'filterlist(l1, "formCode" ,"==","profile", "formCode")';
     parsedGrammar = FEEL.parse(condition);
 
     result = parsedGrammar.build(context);
     expect(result).to.eql(['profile']);
 
-    result = parsedGrammar.build({list: []});
+    result = parsedGrammar.build({ l1: [] });
     expect(result).to.eql([]);
 
-    result = parsedGrammar.build({list: null});
+    result = parsedGrammar.build({ l1: null });
     expect(result).to.eql(null);
 
-    condition = 'filterlist(list, "toolkitCode", "=","ba","")';
+    condition = 'filterlist(l1, "toolkitCode", "=","ba","")';
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
-    expect(result).to.eql(context.list);
+    expect(result).to.eql(context.l1);
 
-    condition = 'filterlist(list, "toolkitCode", "=", "ba", "")';
+    condition = 'filterlist(l1, "toolkitCode", "=", "ba", "")';
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
-    expect(result).to.eql(context.list);
-});
-
-
-  it('should support list contains function', function() {
-      const condition = 'list contains(list, element)';
-      const parsedGrammar = FEEL.parse(condition);
-      let result = parsedGrammar.build({ list: ['foo', 'bar'], element: 'foo' });
-      expect(result).to.be.true;
-      result = parsedGrammar.build({ list: ['foo', 'bar'], element: 'baz' });
-      expect(result).to.be.false;
-      result = parsedGrammar.build({ list: [] , element: 'foo' });
-      expect(result).to.be.false;
-      result = parsedGrammar.build({ list: null, element: 'foo' });
-      expect(result).to.be.null;
-      result = parsedGrammar.build({ list: [ 'foo' ], element: null });
-      expect(result).to.be.false;
-      result = parsedGrammar.build({ list: undefined, element: 'foo' });
-      expect(result).to.be.undefined;
-      result = parsedGrammar.build({ list: [ 'foo' ], element: undefined });
-      expect(result).to.be.false;
+    expect(result).to.eql(context.l1);
   });
 
-  it('should support count function', function() {
+
+  it('should support list contains function', function () {
+    const condition = 'list contains(list, element)';
+    const parsedGrammar = FEEL.parse(condition);
+    let result = parsedGrammar.build({ list: ['foo', 'bar'], element: 'foo' });
+    expect(result).to.be.true;
+    result = parsedGrammar.build({ list: ['foo', 'bar'], element: 'baz' });
+    expect(result).to.be.false;
+    result = parsedGrammar.build({ list: [], element: 'foo' });
+    expect(result).to.be.false;
+    result = parsedGrammar.build({ list: null, element: 'foo' });
+    expect(result).to.be.null;
+    result = parsedGrammar.build({ list: ['foo'], element: null });
+    expect(result).to.be.false;
+    result = parsedGrammar.build({ list: undefined, element: 'foo' });
+    expect(result).to.be.undefined;
+    result = parsedGrammar.build({ list: ['foo'], element: undefined });
+    expect(result).to.be.false;
+  });
+
+  it('should support count function', function () {
     const expression = 'count(list)';
     const parsedGrammar = FEEL.parse(expression);
     let result = parsedGrammar.build({ list: ['foobar', 'bar'] });
@@ -121,7 +146,7 @@ describe(chalk.blue('Built-in list functions tests'), function() {
     expect(result).to.be.undefined;
   });
 
-  it('should support min function', function() {
+  it('should support min function', function () {
     const expression = 'min(list)';
     const parsedGrammar = FEEL.parse(expression);
     let result = parsedGrammar.build({ list: [2, 1, 5] });
@@ -134,7 +159,7 @@ describe(chalk.blue('Built-in list functions tests'), function() {
     expect(result).to.be.undefined;
   });
 
-  it('should support max function', function() {
+  it('should support max function', function () {
     const expression = 'max(list)';
     const parsedGrammar = FEEL.parse(expression);
     let result = parsedGrammar.build({ list: [2, 1, 5] });
@@ -147,7 +172,7 @@ describe(chalk.blue('Built-in list functions tests'), function() {
     expect(result).to.be.undefined;
   });
 
-  it('should support sum function', function() {
+  it('should support sum function', function () {
     const expression = 'sum(list)';
     const parsedGrammar = FEEL.parse(expression);
     let result = parsedGrammar.build({ list: [2, 1, 5] });
@@ -160,7 +185,7 @@ describe(chalk.blue('Built-in list functions tests'), function() {
     expect(result).to.be.undefined;
   });
 
-  it('should support mean function', function() {
+  it('should support mean function', function () {
     const expression = 'mean(list)';
     const parsedGrammar = FEEL.parse(expression);
     let result = parsedGrammar.build({ list: [2, 1, 5] });
@@ -203,59 +228,59 @@ describe(chalk.blue('Built-in list functions tests'), function() {
   //   expect(result).to.be.undefined;
   // });
 
-  it('should support append function', function() {
+  it('should support append function', function () {
     const expression = 'append(list, element)';
     const parsedGrammar = FEEL.parse(expression);
     let result = parsedGrammar.build({ element: 'foo', list: ['bar'] });
-    expect(result).to.be.equalTo([ 'bar', 'foo' ]);
+    expect(result).to.be.equalTo(['bar', 'foo']);
     result = parsedGrammar.build({ element: 'foo', list: [] });
-    expect(result).to.be.equalTo([ 'foo' ]);
+    expect(result).to.be.equalTo(['foo']);
     result = parsedGrammar.build({ element: 'foo', list: null });
     expect(result).to.be.null;
     result = parsedGrammar.build({ element: 'foo', list: undefined });
     expect(result).to.be.undefined;
     result = parsedGrammar.build({ element: null, list: ['bar'] });
-    expect(result).to.be.equalTo([ 'bar', null ]);
+    expect(result).to.be.equalTo(['bar', null]);
     result = parsedGrammar.build({ element: undefined, list: ['bar'] });
-    expect(result).to.be.equalTo([ 'bar' ]);
+    expect(result).to.be.equalTo(['bar']);
   });
 
-  it('should support concatenate function', function() {
+  it('should support concatenate function', function () {
     const expression = 'concatenate(list1, list2)';
     const parsedGrammar = FEEL.parse(expression);
     let result = parsedGrammar.build({ list1: ['foo', 'bar'], list2: ['f', 'b'] });
-    expect(result).to.be.equalTo([ 'foo', 'bar', 'f', 'b' ]);
+    expect(result).to.be.equalTo(['foo', 'bar', 'f', 'b']);
     result = parsedGrammar.build({ list1: ['foo', 'bar'], list2: [] });
-    expect(result).to.be.equalTo([ 'foo', 'bar' ]);
+    expect(result).to.be.equalTo(['foo', 'bar']);
     result = parsedGrammar.build({ list1: [], list2: ['f', 'b'] });
-    expect(result).to.be.equalTo([ 'f', 'b' ]);
+    expect(result).to.be.equalTo(['f', 'b']);
     result = parsedGrammar.build({ list1: [], list2: [] });
-    expect(result).to.be.equalTo([ ]);
+    expect(result).to.be.equalTo([]);
     result = parsedGrammar.build({ list1: ['foo', 'bar'], list2: null });
-    expect(result).to.be.equalTo([ 'foo', 'bar' ]);
+    expect(result).to.be.equalTo(['foo', 'bar']);
     result = parsedGrammar.build({ list1: null, list2: ['f', 'b'] });
-    expect(result).to.be.equalTo([ 'f', 'b' ]);
+    expect(result).to.be.equalTo(['f', 'b']);
     result = parsedGrammar.build({ list1: ['foo', 'bar'], list2: undefined });
-    expect(result).to.be.equalTo([ 'foo', 'bar' ]);
+    expect(result).to.be.equalTo(['foo', 'bar']);
     result = parsedGrammar.build({ list1: undefined, list2: ['f', 'b'] });
-    expect(result).to.be.equalTo([ 'f', 'b' ]);
+    expect(result).to.be.equalTo(['f', 'b']);
   });
 
-  it('should support insert before function', function() {
+  it('should support insert before function', function () {
     const expression = 'insert before(list, position, element)';
     const parsedGrammar = FEEL.parse(expression);
     let result = parsedGrammar.build({ element: 'foo', list: ['bar', 'foobar'], position: 0 });
-    expect(result).to.be.equalTo([ 'foo', 'bar', 'foobar' ]);
+    expect(result).to.be.equalTo(['foo', 'bar', 'foobar']);
     result = parsedGrammar.build({ element: 'foo', list: ['bar', 'foobar'], position: 1 });
-    expect(result).to.be.equalTo([ 'bar', 'foo', 'foobar' ]);
+    expect(result).to.be.equalTo(['bar', 'foo', 'foobar']);
     result = parsedGrammar.build({ element: 'foo', list: ['bar', 'foobar'], position: 2 });
-    expect(result).to.be.equalTo([ 'bar', 'foobar', 'foo' ]);
+    expect(result).to.be.equalTo(['bar', 'foobar', 'foo']);
     result = parsedGrammar.build({ element: null, list: ['bar', 'foobar'], position: 0 });
-    expect(result).to.be.equalTo([ null, 'bar', 'foobar' ]);
+    expect(result).to.be.equalTo([null, 'bar', 'foobar']);
     result = parsedGrammar.build({ element: undefined, list: ['bar', 'foobar'], position: 0 });
     expect(result).to.be.undefined;
     result = parsedGrammar.build({ element: 'foo', list: [], position: 0 });
-    expect(result).to.be.equalTo([ 'foo' ]);
+    expect(result).to.be.equalTo(['foo']);
     result = parsedGrammar.build({ element: 'foo', list: null, position: 0 });
     expect(result).to.be.null;
     result = parsedGrammar.build({ element: 'foo', list: undefined, position: 0 });
@@ -266,13 +291,13 @@ describe(chalk.blue('Built-in list functions tests'), function() {
     expect(result).to.be.undefined;
   });
 
-  it('should support remove function', function() {
+  it('should support remove function', function () {
     const expression = 'remove(list, position)';
     const parsedGrammar = FEEL.parse(expression);
     let result = parsedGrammar.build({ list: ['bar', 'foobar'], position: 0 });
-    expect(result).to.be.equalTo([ 'foobar' ]);
+    expect(result).to.be.equalTo(['foobar']);
     result = parsedGrammar.build({ list: ['bar', 'foobar'], position: 1 });
-    expect(result).to.be.equalTo([ 'bar' ]);
+    expect(result).to.be.equalTo(['bar']);
     result = parsedGrammar.build({ list: null, position: 0 });
     expect(result).to.be.null;
     result = parsedGrammar.build({ list: undefined, position: 0 });
@@ -283,7 +308,7 @@ describe(chalk.blue('Built-in list functions tests'), function() {
     expect(result).to.be.undefined;
   });
 
-  it('should support reverse function', function() {
+  it('should support reverse function', function () {
     const expression = 'reverse(list)';
     const parsedGrammar = FEEL.parse(expression);
     let result = parsedGrammar.build({ list: [2, 1, 5] });
@@ -296,7 +321,7 @@ describe(chalk.blue('Built-in list functions tests'), function() {
     expect(result).to.be.undefined;
   });
 
-  it('should support index of function', function() {
+  it('should support index of function', function () {
     const expression = 'index of(list, match)';
     const parsedGrammar = FEEL.parse(expression);
     let result = parsedGrammar.build({ list: [2, 1, 5], match: 5 });
@@ -321,41 +346,41 @@ describe(chalk.blue('Built-in list functions tests'), function() {
     expect(result).to.be.equalTo([1]);
   });
 
-  it('should support union function', function() {
+  it('should support union function', function () {
     const condition = 'union(list1, list2)';
     const parsedGrammar = FEEL.parse(condition);
     let result = parsedGrammar.build({ list1: ['foo', 'bar'], list2: ['f', 'foo', 'b'] });
-    expect(result).to.be.equalTo([ 'foo', 'bar', 'f', 'b' ]);
+    expect(result).to.be.equalTo(['foo', 'bar', 'f', 'b']);
     result = parsedGrammar.build({ list1: null, list2: ['f', 'foo', 'b'] });
-    expect(result).to.be.equalTo([ 'f', 'foo', 'b' ]);
+    expect(result).to.be.equalTo(['f', 'foo', 'b']);
     result = parsedGrammar.build({ list1: null, list2: null });
     expect(result).to.be.equalTo([]);
     result = parsedGrammar.build({ list1: undefined, list2: ['f', 'foo', 'b'] });
-    expect(result).to.be.equalTo([ 'f', 'foo', 'b' ]);
+    expect(result).to.be.equalTo(['f', 'foo', 'b']);
     result = parsedGrammar.build({ list1: undefined, list2: undefined });
     expect(result).to.be.equalTo([]);
   });
 
-  it('should support distinct values function', function() {
+  it('should support distinct values function', function () {
     const condition = 'distinct values(list)';
     const parsedGrammar = FEEL.parse(condition);
     let result = parsedGrammar.build({ list: ['foo', 'bar', 'f', 'foo', 'b'] });
-    expect(result).to.be.equalTo([ 'foo', 'bar', 'f', 'b' ]);
+    expect(result).to.be.equalTo(['foo', 'bar', 'f', 'b']);
     result = parsedGrammar.build({ list: null });
     expect(result).to.be.null;
     result = parsedGrammar.build({ list: undefined });
     expect(result).to.be.undefined;
   });
 
-  it('should support flatten function', function() {
+  it('should support flatten function', function () {
     const condition = 'flatten(list)';
     const parsedGrammar = FEEL.parse(condition);
     let result = parsedGrammar.build({ list: [['foo', 'bar'], ['f', 'b'], 'foobar'] });
-    expect(result).to.be.equalTo([ 'foo', 'bar', 'f', 'b', 'foobar' ]);
+    expect(result).to.be.equalTo(['foo', 'bar', 'f', 'b', 'foobar']);
     result = parsedGrammar.build({ list: [['foo', 'bar'], ['f', 'b'], null] });
-    expect(result).to.be.equalTo([ 'foo', 'bar', 'f', 'b', null ]);
+    expect(result).to.be.equalTo(['foo', 'bar', 'f', 'b', null]);
     result = parsedGrammar.build({ list: [['foo', 'bar'], ['f', 'b'], undefined] });
-    expect(result).to.be.equalTo([ 'foo', 'bar', 'f', 'b', undefined ]);
+    expect(result).to.be.equalTo(['foo', 'bar', 'f', 'b', undefined]);
     result = parsedGrammar.build({ list: null });
     expect(result).to.be.null;
     result = parsedGrammar.build({ list: undefined });
