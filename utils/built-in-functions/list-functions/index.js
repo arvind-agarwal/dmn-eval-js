@@ -264,6 +264,12 @@ const flatten = (...args) => {
   return _.flattenDeep(array);
 };
 
+const sort = (list, compareFunction) => {
+  if (!compareFunction.isFunction) throw new Error('Invalid compare function calling sort, provide a compare function taking two parameters');
+  const result = [...list].sort((a, b) => (compareFunction.invoke(a, b) ? 1 : -1));
+  return result;
+};
+
 module.exports = {
   'list contains': listContains,
   count,
@@ -282,4 +288,5 @@ module.exports = {
   union,
   'distinct values': distinctValues,
   flatten,
+  sort,
 };

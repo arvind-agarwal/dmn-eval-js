@@ -416,27 +416,102 @@ module.exports = function (ast) {
     // log.debug(options, `FilterExpressionNode - expr build success with result - ${exprResult},text: ${this.text}`);
     // rlog.debug(options, 'FilterExpressionNode build success (expr)', this.rule, this.text, exprResult);
     const result = exprResult.context ? exprResult.context : exprResult;
-    if (this.filterExpr instanceof ast.LiteralNode) {
+    if (this.filterExpr instanceof ast.ComparisonExpressionNode
+        || this.filterExpr instanceof ast.LogicalExpressionNode
+    ) {
+      let kwargsNew = {};
+      if (Array.isArray(result)) {
+        const booleanValues = result.map((d) => {
+          if (typeof d === 'object') {
+            kwargsNew = addKwargs(args, d);
+          } else {
+            kwargsNew = addKwargs(args, {
+              item: d,
+            });
+          }
+          return this.filterExpr.build(kwargsNew);
+        });
+        const truthyValues = result.filter((d, i) => booleanValues[i]);
+        return truthyValues;
+      }
+      throw new Error('filter can be applied only on a collection');
+      // log.error(options, 'FilterExpressionNode - filter can only be applied on a collection', `text: ${this.text}`);
+      // rlog.error(options, 'FilterExpressionNode build failed', this.rule, this.text, 'Can only be applied to a collection');
+    } else {
       const value = this.filterExpr.build(args);
-      return result[value];
+      if (Array.isArray(result)) {
+        return result.at(value);
+      } if (result) {
+        throw new Error('Cannot access element of non array/list');
+      }
+      // It will reach here is the value is of not array type and is falsy
+      return !!result;
     }
-    let kwargsNew = {};
-    if (Array.isArray(result)) {
-      const booleanValues = result.map((d) => {
-        if (typeof d === 'object') {
-          kwargsNew = addKwargs(args, d);
-        } else {
-          kwargsNew = addKwargs(args, {
-            item: d,
-          });
-        }
-        return this.filterExpr.build(kwargsNew);
-      });
-      const truthyValues = result.filter((d, i) => booleanValues[i]);
-      return truthyValues;
+  };
+
+  function InvokeFunction(context, ...parray) {
+    const obj = {};
+    if (this.params.length !== parray.length) throw new Error(`Invalid number of arguments passed expecting ${this.params.length} arguments`);
+    this.params.forEach((param, i) => {
+      obj[param] = parray[i];
+    });
+    const argsNew = addKwargs(context, obj);
+    const result = this.fn.build(argsNew);
+    return result;
+  }
+
+  ast.FunctionDefinitionNode.prototype.build = function (args) { // eslint-disable-line no-unused-vars
+    // const options = (args && args.context && args.context.options) || {};
+    const fnDfn = { isFunction: true };
+    fnDfn.invoke = InvokeFunction.bind(fnDfn, args);
+    if (this.formalParams && this.formalParams.length) {
+      const results = this.formalParams.map((d) => d.build(null, false));
+      fnDfn.fn = this.body;
+      fnDfn.params = results;
+      // log.debug(options, `FunctionDefinitionNode build success - body - ${stringify(this.body)}, params - ${stringify(results)}, text: ${this.text}`);
+      // rlog.debug(options, 'FunctionDefinitionNode build success', this.rule, this.text, `BODY - ${stringify(this.body)}, PARAMS - ${stringify(results)}`);
+      return fnDfn;
     }
-    throw new Error('filter can be applied only on a collection');
-    // log.error(options, 'FilterExpressionNode - filter can only be applied on a collection', `text: ${this.text}`);
-    // rlog.error(options, 'FilterExpressionNode build failed', this.rule, this.text, 'Can only be applied to a collection');
+    fnDfn.fn = this.body;
+    fnDfn.params = null;
+
+    // log.debug(options, `FunctionDefinitionNode build success - body - ${stringify(this.body)}, params - none, text: ${this.text}`);
+    // rlog.debug(options, 'FunctionDefinitionNode build success', this.rule, this.text, `BODY - ${stringify(this.body)}, PARAMS - none`);
+    return fnDfn;
+  };
+
+  ast.FunctionBodyNode.prototype.build = function (args) {
+    // const options = (args && args.context && args.context.options) || {};
+    if (this.extern) {
+      throw new Error('External function not yet supported');
+      // // log.debug(options, `FunctionBodyNode - external function found - ${this.expr}`);
+      // // //rlog.debug(options, 'FunctionBodyNode ')
+      // try {
+      //   this.expr.build({}).then((bodyMeta) => {
+      //     externalFn(Object.assign({}, args.context, args.kwargs), bodyMeta).then((res) => {
+      //       // log.debug(options, `FunctionBodyNode build success with result - ${res}, text: ${this.text}`);
+      //       // rlog.debug(options, 'FunctionBodyNode build success', this.rule, this.text, res);
+      //       resolve(res);
+      //     }).catch((err) => {
+      //       // log.error(options, `FunctionBodyNode build failed with error from externalFn - ${err},text: ${this.text}`);
+      //       // rlog.error(options, 'FunctionBodyNode build failed (from externalFn)', this.rule, this.text, err);
+      //       reject(err);
+      //     });
+      //   }).catch((err) => {
+      //     // log.error(options, `FunctionBodyNode build failed with error when building ${this.expr} - ${err},text: ${this.text}`);
+      //     // rlog.error(options, 'FunctionBodyNode build failed', this.rule, this.text, `${err}, Expression: ${this.expr}`);
+      //     reject(err);
+      //   });
+      // } catch (err) {
+      //   // log.error(options, `FunctionBodyNode - unexpected error - ${err},text: ${this.text}`);
+      //   // rlog.error(options, 'FunctionBodyNode build failed', this.rule, this.text, `Unexpected error: ${err}`);
+      //   reject(err);
+      // }
+    } else {
+      const res = this.expr.build(args);
+      // log.debug(options, `FunctionBodyNode build success with result - ${stringify(res)}, text: ${this.text}`);
+      // rlog.debug(options, 'FunctionBodyNode build success', this.rule, this.text, stringify(res));
+      return res;
+    }
   };
 };

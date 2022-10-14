@@ -177,6 +177,21 @@ function FilterExpressionNode(expr, filterExpr, loc, text, rule) {
   this.rule = rule;
 }
 
+function FunctionDefinitionNode(formalParams, body, loc, text, rule) {
+  this.type = 'FunctionDefinition';
+  this.formalParams = formalParams;
+  this.body = body;
+  this.loc = loc; this.text = text;
+  this.rule = rule;
+}
+
+function FunctionBodyNode(expr, extern, loc, text, rule) {
+  this.type = 'FunctionBody';
+  this.expr = expr;
+  this.extern = extern;
+  this.loc = loc; this.text = text;
+  this.rule = rule;
+}
 /* End AST Node Constructors */
 
 /* Expose the AST Node Constructors */
@@ -203,5 +218,7 @@ ast.LogicalExpressionNode = LogicalExpressionNode;
 ast.ForExpressionNode = ForExpressionNode;
 ast.IfExpressionNode = IfExpressionNode;
 ast.FilterExpressionNode = FilterExpressionNode;
+ast.FunctionBodyNode = FunctionBodyNode;
+ast.FunctionDefinitionNode = FunctionDefinitionNode;
 
 module.exports = ast;

@@ -105,6 +105,7 @@ TxtExpa
     = QuantifiedExpression
     / ForExpression
     / IfExpression
+    / FunctionDefinition
 
 TxtExpi
 	="(" __ expr:TextualExpression __ ")"
@@ -461,6 +462,8 @@ Keyword
     / IfToken
     / ThenToken
     / ElseToken
+    / FunctionToken
+    / ExternalToken
 
 DateTimeKeyword
   = "date and time"               !NamePartChar
@@ -623,6 +626,28 @@ ListEntries
         return buildList(head,tail,3);
       }
 
+
+FunctionDefinition
+    = FunctionToken "(" params:(__ FormalParameters)? __ ")" __ body:FunctionBody
+        {
+            log(`FunctionDefinition (${text()})`);
+            return new ast.FunctionDefinitionNode(extractOptional(params,1),body,location(), text(), rule());
+        }
+
+FunctionBody
+    = extern:(ExternalToken __)? expr:Expression
+        {
+            log(`FunctionBody (${text()})`);
+            return new ast.FunctionBodyNode(expr,extractOptional(extern,0),location(), text(), rule());
+        }
+
+FormalParameters
+    = head:Name tail:(__ "," __ Name)*
+        {
+            log(`FormalParameters (${text()})`);
+            return buildList(head,tail,3);
+        }
+
 NullToken       =   "null"                              !NamePartChar
 SomeToken       =   "some"                              !NamePartChar
 EveryToken      =   "every"                             !NamePartChar
@@ -636,6 +661,8 @@ ReturnToken     =   "return"                            !NamePartChar
 IfToken         =   "if"                                !NamePartChar
 ThenToken       =   "then"                              !NamePartChar
 ElseToken       =   "else"                              !NamePartChar
+FunctionToken   =   "function"                          !NamePartChar
+ExternalToken   =   "external"                          !NamePartChar
 __
     = (WhiteSpace)*
 

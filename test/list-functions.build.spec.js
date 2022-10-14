@@ -11,6 +11,31 @@ const FEEL = require('../dist/feel');
 
 describe(chalk.blue('Built-in list functions tests'), function () {
 
+  it('should support function definition', function() {
+    let context = { 
+      l1: [{ formCode: "profile", toolkitCode: "ba" }, { formCode: "strategy", toolkitCode: "ba" }],
+      x:1,
+      l2: [{x:1}, {x:5}, {x:3}, {x:2}, {x:6}, {x:8}]
+   };
+
+    let condition = 'function(a,b) a.formCode < b.formCode and count(l1)=2';
+    let parsedGrammar = FEEL.parse(condition);
+    let result = parsedGrammar.build(context);
+    const s1 = result.invoke(context.l1[0], context.l1[1]);
+    expect(s1).to.be.true;
+
+    condition = 'sort(l2, function(a,b) a.x > b.x)';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.eql([{x:1}, {x:2}, {x:3}, {x:5}, {x:6}, {x:8}]);
+
+    condition = 'sort(l2, function(a,b) a.x < b.x)';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.eql([{x:8}, {x:6}, {x:5}, {x:3}, {x:2}, {x:1}]);
+
+  });
+
   it('should support if expression', function() {
     let context = { l1: [{ formCode: "profile", toolkitCode: "ba" }, { formCode: "strategy", toolkitCode: "ba" }], x:1 };
 
