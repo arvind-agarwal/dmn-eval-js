@@ -12,7 +12,7 @@ const FEEL = require('../dist/feel');
 describe(chalk.blue('Built-in list functions tests'), function () {
 
   it('should support if expression', function() {
-    let context = { l1: [{ formCode: "profile", toolkitCode: "ba" }, { formCode: "strategy", toolkitCode: "ba" }] };
+    let context = { l1: [{ formCode: "profile", toolkitCode: "ba" }, { formCode: "strategy", toolkitCode: "ba" }], x:1 };
 
     let condition = 'if l1.length >= 2 then "LENMORETHAN2" else "LENLESSTHANTWO"';
     let parsedGrammar = FEEL.parse(condition);
@@ -24,6 +24,12 @@ describe(chalk.blue('Built-in list functions tests'), function () {
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
     expect(result).to.eql({ formCode: "strategy", toolkitCode: "ba" });
+
+    condition = 'l1[x-1]';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.eql({ formCode: "profile", toolkitCode: "ba" });
+
 
     condition = 'l1[toolkitCode="ba" or formCode="profile"]';
     parsedGrammar = FEEL.parse(condition);
