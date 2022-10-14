@@ -6,6 +6,7 @@
 */
 
 const _ = require('lodash');
+const { FunctionDefinitionNode } = require('../../../dist/feel-ast');
 /* eslint consistent-return: 0 */
 
 // // Get a property with dot notation in an object tree
@@ -265,7 +266,10 @@ const flatten = (...args) => {
 };
 
 const sort = (list, compareFunction) => {
-  if (!compareFunction.isFunction) throw new Error('Invalid compare function calling sort, provide a compare function taking two parameters');
+  // special handling of sort when there is no compare function to ensure proper sorting for numeric values
+  // Otherwise sort treats everything like a text
+  if(!compareFunction || !compareFunction.isFunction) return [...list].sort((a,b)=>a>b?1:-1);
+  if (!compareFunction.isFunction || !compareFunction.params || !compareFunction.params.length === 2) throw new Error('Invalid compare function calling sort, provide a compare function taking two parameters');
   const result = [...list].sort((a, b) => (compareFunction.invoke(a, b) ? 1 : -1));
   return result;
 };

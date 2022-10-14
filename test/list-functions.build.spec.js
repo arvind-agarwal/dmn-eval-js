@@ -11,12 +11,12 @@ const FEEL = require('../dist/feel');
 
 describe(chalk.blue('Built-in list functions tests'), function () {
 
-  it('should support function definition', function() {
-    let context = { 
+  it('should support function definition', function () {
+    let context = {
       l1: [{ formCode: "profile", toolkitCode: "ba" }, { formCode: "strategy", toolkitCode: "ba" }],
-      x:1,
-      l2: [{x:1}, {x:5}, {x:3}, {x:2}, {x:6}, {x:8}]
-   };
+      x: 1,
+      l2: [{ x: 1 }, { x: 5 }, { x: 3 }, { x: 2 }, { x: 6 }, { x: 8 }]
+    };
 
     let condition = 'function(a,b) a.formCode < b.formCode and count(l1)=2';
     let parsedGrammar = FEEL.parse(condition);
@@ -24,27 +24,32 @@ describe(chalk.blue('Built-in list functions tests'), function () {
     const s1 = result.invoke(context.l1[0], context.l1[1]);
     expect(s1).to.be.true;
 
+    condition = 'sort([5,4,21,3,1])';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.eql([1,3,4,5,21]);
+
     condition = 'sort(l2, function(a,b) a.x > b.x)';
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
-    expect(result).to.eql([{x:1}, {x:2}, {x:3}, {x:5}, {x:6}, {x:8}]);
+    expect(result).to.eql([{ x: 1 }, { x: 2 }, { x: 3 }, { x: 5 }, { x: 6 }, { x: 8 }]);
 
     condition = 'sort(l2, function(a,b) a.x < b.x)';
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
-    expect(result).to.eql([{x:8}, {x:6}, {x:5}, {x:3}, {x:2}, {x:1}]);
+    expect(result).to.eql([{ x: 8 }, { x: 6 }, { x: 5 }, { x: 3 }, { x: 2 }, { x: 1 }]);
 
   });
 
-  it('should support if expression', function() {
-    let context = { l1: [{ formCode: "profile", toolkitCode: "ba" }, { formCode: "strategy", toolkitCode: "ba" }], x:1 };
+  it('should support if expression', function () {
+    let context = { l1: [{ formCode: "profile", toolkitCode: "ba" }, { formCode: "strategy", toolkitCode: "ba" }], x: 1 };
 
     let condition = 'if l1.length >= 2 then "LENMORETHAN2" else "LENLESSTHANTWO"';
     let parsedGrammar = FEEL.parse(condition);
     let result = parsedGrammar.build(context);
     expect(result).to.equal('LENMORETHAN2');
 
-    
+
     condition = '(l1[toolkitCode="ba"])[-1]';
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
@@ -59,7 +64,7 @@ describe(chalk.blue('Built-in list functions tests'), function () {
     condition = 'l1[toolkitCode="ba" or formCode="profile"]';
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
-    expect(result).to.eql([{ formCode: "profile", toolkitCode: "ba" },  { formCode: "strategy", toolkitCode: "ba" }]);
+    expect(result).to.eql([{ formCode: "profile", toolkitCode: "ba" }, { formCode: "strategy", toolkitCode: "ba" }]);
 
     condition = 'l1[toolkitCode="ba" and formCode="profile"]';
     parsedGrammar = FEEL.parse(condition);
@@ -102,7 +107,7 @@ describe(chalk.blue('Built-in list functions tests'), function () {
     condition = 'for i in l1 return i.formCode';
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
-    expect(result).to.eql(["profile","strategy"]);
+    expect(result).to.eql(["profile", "strategy"]);
 
     condition = "l1";
     parsedGrammar = FEEL.parse(condition);
