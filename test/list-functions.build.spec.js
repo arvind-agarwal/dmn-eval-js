@@ -19,10 +19,39 @@ describe(chalk.blue('Built-in list functions tests'), function () {
     let result = parsedGrammar.build(context);
     expect(result).to.equal('LENMORETHAN2');
 
+    
+    condition = '(l1[toolkitCode="ba"])[-1]';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.eql({ formCode: "strategy", toolkitCode: "ba" });
+
+    condition = 'l1[toolkitCode="ba" or formCode="profile"]';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.eql([{ formCode: "profile", toolkitCode: "ba" },  { formCode: "strategy", toolkitCode: "ba" }]);
+
+    condition = 'l1[toolkitCode="ba" and formCode="profile"]';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.eql([{ formCode: "profile", toolkitCode: "ba" }]);
+
+    condition = '(l1[toolkitCode="ba" and formCode="profile"])[0]';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.eql({ formCode: "profile", toolkitCode: "ba" });
+
+    condition = '(l1[toolkitCode="ba" and formCode="profile1"])[0]';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.be.undefined;
+
+
     condition = 'if l1.length >= 2 and (some item in l1 satisfies item.formCode="profile1") then "LENMORETHAN2" else "LENLESSTHANTWO"';
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);
     expect(result).to.equal('LENLESSTHANTWO');
+
+
 
   });
 

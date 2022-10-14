@@ -169,6 +169,13 @@ function IfExpressionNode(condition, thenExpr, elseExpr, loc, text, rule) {
   this.rule = rule;
 }
 
+function FilterExpressionNode(expr, filterExpr, loc, text, rule) {
+  this.type = 'FilterExpression';
+  this.expr = expr;
+  this.filterExpr = filterExpr;
+  this.loc = loc; this.text = text;
+  this.rule = rule;
+}
 
 /* End AST Node Constructors */
 
@@ -195,5 +202,6 @@ ast.ListNode = ListNode;
 ast.LogicalExpressionNode = LogicalExpressionNode;
 ast.ForExpressionNode = ForExpressionNode;
 ast.IfExpressionNode = IfExpressionNode;
+ast.FilterExpressionNode = FilterExpressionNode;
 
 module.exports = ast;

@@ -407,4 +407,46 @@ module.exports = function (ast) {
     // rlog.debug(options, 'IfExpressionNode build success', this.rule, this.text, stringify(result));
     return result;
   };
-};
+
+  // TODO : implement item and object filter
+  // TODO : see if the filter returns a function which can be applied on the list during execution
+  ast.FilterExpressionNode.prototype.build = function (args) {
+    // const options = (args && args.context && args.context.options) || {};
+    const exprResult = this.expr.build(args);
+    // log.debug(options, `FilterExpressionNode - expr build success with result - ${exprResult},text: ${this.text}`);
+    // rlog.debug(options, 'FilterExpressionNode build success (expr)', this.rule, this.text, exprResult);
+    const result = exprResult.context ? exprResult.context : exprResult;
+    if (this.filterExpr instanceof ast.ComparisonExpressionNode ||
+        this.filterExpr instanceof ast.LogicalExpressionNode
+      ) {
+      let kwargsNew = {};
+      if (Array.isArray(result)) {
+        const booleanValues = result.map((d) => {
+          if (typeof d === 'object') {
+            kwargsNew = addKwargs(args, d);
+          } else {
+            kwargsNew = addKwargs(args, {
+              item: d,
+            });
+          }
+          return this.filterExpr.build(kwargsNew);
+        });
+        const truthyValues = result.filter((d, i) => booleanValues[i]);
+        return truthyValues;
+      } else {
+        throw new Error('filter can be applied only on a collection');
+        // log.error(options, 'FilterExpressionNode - filter can only be applied on a collection', `text: ${this.text}`);
+        // rlog.error(options, 'FilterExpressionNode build failed', this.rule, this.text, 'Can only be applied to a collection');
+      }
+    } else {
+      const value = this.filterExpr.build(args);
+      if (Array.isArray(result)) {
+        return result.at(value);
+      } else if(result) {
+        throw new Error('Cannot access element of non array/list');
+      }
+      // It will reach here is the value is of not array type and is falsy
+      return undefined;
+    }
+  };
+}

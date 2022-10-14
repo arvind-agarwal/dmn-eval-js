@@ -98,6 +98,7 @@ TextualExpression
     / TxtExpc // Conjunction
     / TxtExpd // Comparison
     / TxtExpe // ArithmeticExpression
+    / TxtExph // FilterExpression, Function Invocation
     / TxtExpi // literal | simple positive unary test | name | "(" , textual expression , ")"
 
 TxtExpa
@@ -479,7 +480,8 @@ TxtExpe
 	= ArithmeticExpression
 
 LeftExpe
-	= TxtExpi
+	= TxtExph
+    / LeftExph
 
 // 51.
 Comparison
@@ -588,6 +590,20 @@ IfExpression
         {
             log(`IfExpression (${text()})`);
             return new ast.IfExpressionNode(condition,thenExpr,elseExpr,location(), text(), rule());
+        }
+
+TxtExph
+	= FilterExpression
+
+
+LeftExph
+	= TxtExpi
+
+FilterExpression
+    = head:LeftExph __ "[" __ tail:Expression __ "]"
+        {
+            log(`FilterExpression (${text()})`);
+            return new ast.FilterExpressionNode(head,tail,location(), text(), rule());
         }
 
 BoxedExpression
