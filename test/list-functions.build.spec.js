@@ -125,27 +125,27 @@ describe(chalk.blue('Built-in list functions tests'), function () {
     result = parsedGrammar.build(context);
     expect(result).to.be.true;
 
-    condition = 'filterlist(l1, "formCode" ,"==","profile", "formCode")';
-    parsedGrammar = FEEL.parse(condition);
+    // condition = 'filterlist(l1, "formCode" ,"==","profile", "formCode")';
+    // parsedGrammar = FEEL.parse(condition);
 
-    result = parsedGrammar.build(context);
-    expect(result).to.eql(['profile']);
+    // result = parsedGrammar.build(context);
+    // expect(result).to.eql(['profile']);
 
-    result = parsedGrammar.build({ l1: [] });
-    expect(result).to.eql([]);
+    // result = parsedGrammar.build({ l1: [] });
+    // expect(result).to.eql([]);
 
-    result = parsedGrammar.build({ l1: null });
-    expect(result).to.eql(null);
+    // result = parsedGrammar.build({ l1: null });
+    // expect(result).to.eql(null);
 
-    condition = 'filterlist(l1, "toolkitCode", "=","ba","")';
-    parsedGrammar = FEEL.parse(condition);
-    result = parsedGrammar.build(context);
-    expect(result).to.eql(context.l1);
+    // condition = 'filterlist(l1, "toolkitCode", "=","ba","")';
+    // parsedGrammar = FEEL.parse(condition);
+    // result = parsedGrammar.build(context);
+    // expect(result).to.eql(context.l1);
 
-    condition = 'filterlist(l1, "toolkitCode", "=", "ba", "")';
-    parsedGrammar = FEEL.parse(condition);
-    result = parsedGrammar.build(context);
-    expect(result).to.eql(context.l1);
+    // condition = 'filterlist(l1, "toolkitCode", "=", "ba", "")';
+    // parsedGrammar = FEEL.parse(condition);
+    // result = parsedGrammar.build(context);
+    // expect(result).to.eql(context.l1);
   });
 
 

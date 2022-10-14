@@ -8,49 +8,49 @@
 const _ = require('lodash');
 /* eslint consistent-return: 0 */
 
-// Get a property with dot notation in an object tree
-function getProperty(o, p) {
-  if (!p || !p.split) return undefined;
-  const ps = p.split(',');
-  let pv = o;
-  ps.forEach((m) => {
-    if (pv === undefined || pv === null) return undefined;
-    const cv = pv[m];
-    pv = cv;
-  });
-  return pv;
-}
+// // Get a property with dot notation in an object tree
+// function getProperty(o, p) {
+//   if (!p || !p.split) return undefined;
+//   const ps = p.split(',');
+//   let pv = o;
+//   ps.forEach((m) => {
+//     if (pv === undefined || pv === null) return undefined;
+//     const cv = pv[m];
+//     pv = cv;
+//   });
+//   return pv;
+// }
 
-// valueToFilter - will contain member name, deeper object can be accessed using . notation but not arrays
-// returnMember - In case we need resulting array to be flattend with single property name of the property
-// comparison Operator = > < <= >=
-const filterList = (list, propertyToSearch, comparsionOperatorParam, valueToFilter, returnMember) => {
-  let comparsionOperator = comparsionOperatorParam;
-  if (list === undefined || list === null) return list;
-  if (propertyToSearch === undefined || propertyToSearch === null) return false;
-  if (!Array.isArray(list)) throw new Error('operation unsupported on element of this type');
-  if (!comparsionOperator || comparsionOperator === '=') comparsionOperator = '==';
-  // eslint-disable-next-line
-  const operatorMap = require('../../helper/fn-generator');
+// // valueToFilter - will contain member name, deeper object can be accessed using . notation but not arrays
+// // returnMember - In case we need resulting array to be flattend with single property name of the property
+// // comparison Operator = > < <= >=
+// const filterList = (list, propertyToSearch, comparsionOperatorParam, valueToFilter, returnMember) => {
+//   let comparsionOperator = comparsionOperatorParam;
+//   if (list === undefined || list === null) return list;
+//   if (propertyToSearch === undefined || propertyToSearch === null) return false;
+//   if (!Array.isArray(list)) throw new Error('operation unsupported on element of this type');
+//   if (!comparsionOperator || comparsionOperator === '=') comparsionOperator = '==';
+//   // eslint-disable-next-line
+//   const operatorMap = require('../../helper/fn-generator');
 
-  // list.filter(item => item[propertyToSearch] === valueToFilter )
-  const resultArray = [];
-  list.forEach((item) => {
-    const propValue = getProperty(item, propertyToSearch);
-    let comparisonResult = false;
-    comparisonResult = operatorMap(comparsionOperator)(propValue, valueToFilter);
+//   // list.filter(item => item[propertyToSearch] === valueToFilter )
+//   const resultArray = [];
+//   list.forEach((item) => {
+//     const propValue = getProperty(item, propertyToSearch);
+//     let comparisonResult = false;
+//     comparisonResult = operatorMap(comparsionOperator)(propValue, valueToFilter);
 
-    if (comparisonResult) {
-      if (returnMember) {
-        const value = getProperty(item, returnMember);
-        resultArray.push(value);
-      } else {
-        resultArray.push(item);
-      }
-    }
-  });
-  return resultArray;
-};
+//     if (comparisonResult) {
+//       if (returnMember) {
+//         const value = getProperty(item, returnMember);
+//         resultArray.push(value);
+//       } else {
+//         resultArray.push(item);
+//       }
+//     }
+//   });
+//   return resultArray;
+// };
 
 const listContains = (list, element) => {
   if (list === undefined || list === null) {
@@ -123,27 +123,27 @@ const mean = (list) => {
   return result;
 };
 
-const and = (list) => {
-  if (list === undefined || list === null) {
-    return list;
-  }
-  if (!Array.isArray(list)) {
-    throw new Error('operation unsupported on element of this type');
-  } else {
-    return list.reduce((recur, next) => recur && next, true);
-  }
-};
+// const and = (list) => {
+//   if (list === undefined || list === null) {
+//     return list;
+//   }
+//   if (!Array.isArray(list)) {
+//     throw new Error('operation unsupported on element of this type');
+//   } else {
+//     return list.reduce((recur, next) => recur && next, true);
+//   }
+// };
 
-const or = (list) => {
-  if (list === undefined || list === null) {
-    return list;
-  }
-  if (!Array.isArray(list)) {
-    throw new Error('operation unsupported on element of this type');
-  } else {
-    return list.reduce((recur, next) => recur || next, false);
-  }
-};
+// const or = (list) => {
+//   if (list === undefined || list === null) {
+//     return list;
+//   }
+//   if (!Array.isArray(list)) {
+//     throw new Error('operation unsupported on element of this type');
+//   } else {
+//     return list.reduce((recur, next) => recur || next, false);
+//   }
+// };
 
 const append = (list, element) => {
   if (list === undefined || list === null) {
@@ -271,8 +271,8 @@ module.exports = {
   max,
   sum,
   mean,
-  and,
-  or,
+  // and,
+  // or,
   append,
   concatenate,
   'insert before': insertBefore,
@@ -282,5 +282,4 @@ module.exports = {
   union,
   'distinct values': distinctValues,
   flatten,
-  filterlist: filterList,
 };
