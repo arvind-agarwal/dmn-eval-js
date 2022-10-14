@@ -47,189 +47,166 @@ const operatorMap = {
     if (anyUndefined(x, y)) {
       return getUndefined(x, y);
     }
-    try {
-      if (presencetypeEq(x, y)) {
-        if (typeof x === 'number' && typeof y === 'number') {
-          return Big(x).lt(y);
-        } if (typeof x === 'string' && typeof y === 'string') {
-          return x < y;
-        } if (x instanceof Date && y instanceof Date) {
-          return x < y;
-        } if (x.isDate && y.isDate) {
-          const checkLt = checkInequality('<', '>'); // eslint-disable-line no-use-before-define
-          return checkLt(x, y, dateTimeComponent.date) > 0;
-        } if (x.isDateTime && y.isDateTime) {
-          return valueDT(x) < valueDT(y);
-        } if (x.isTime && y.isTime) {
-          // make y with the same offset as x before comparison
-          const xOffset = x['time offset'];
-          y.utcOffset(xOffset);
-          return valueT(x) < valueT(y);
-        } if (x.isDtd && y.isDtd) {
-          return valueDTD(x) < valueDTD(y);
-        } if (x.isYmd && y.isYmd) {
-          return valueYMD(x) < valueYMD(y);
-        }
-        throw new Error(`${x.type || typeof x} < ${y.type || typeof y} : operation unsupported for one or more operands types`);
+    if (presencetypeEq(x, y)) {
+      if (typeof x === 'number' && typeof y === 'number') {
+        return Big(x).lt(y);
+      } if (typeof x === 'string' && typeof y === 'string') {
+        return x < y;
+      } if (x instanceof Date && y instanceof Date) {
+        return x < y;
+      } if (x.isDate && y.isDate) {
+        const checkLt = checkInequality('<', '>'); // eslint-disable-line no-use-before-define
+        return checkLt(x, y, dateTimeComponent.date) > 0;
+      } if (x.isDateTime && y.isDateTime) {
+        return valueDT(x) < valueDT(y);
+      } if (x.isTime && y.isTime) {
+        // make y with the same offset as x before comparison
+        const xOffset = x['time offset'];
+        y.utcOffset(xOffset);
+        return valueT(x) < valueT(y);
+      } if (x.isDtd && y.isDtd) {
+        return valueDTD(x) < valueDTD(y);
+      } if (x.isYmd && y.isYmd) {
+        return valueYMD(x) < valueYMD(y);
       }
-      throw new Error(`${typeof x && x} < ${typeof y && y} : operation invalid for one or more operands types`);
-    } catch (err) {
-      throw err;
+      throw new Error(`${x.type || typeof x} < ${y.type || typeof y} : operation unsupported for one or more operands types`);
     }
+    throw new Error(`${typeof x && x} < ${typeof y && y} : operation invalid for one or more operands types`);
   }),
   '<=': _.curry((x, y) => {
     if (anyUndefined(x, y)) {
       return getUndefined(x, y);
     }
-    try {
-      if (presencetypeEq(x, y)) {
-        if (typeof x === 'number' && typeof y === 'number') {
-          return Big(x).lte(y);
-        } if (typeof x === 'string' && typeof y === 'string') {
-          return x <= y;
-        } if (x instanceof Date && y instanceof Date) {
-          return x <= y;
-        } if (x.isDate && y.isDate) {
-          const checkLt = checkInequality('<', '>'); // eslint-disable-line no-use-before-define
-          return checkLt(x, y, dateTimeComponent.date) >= 0; // eslint-disable-line no-use-before-define
-        } if (x.isDateTime && y.isDateTime) {
-          return valueDT(x) <= valueDT(y);
-        } if (x.isTime && y.isTime) {
-          // make y with the same offset as x before comparison
-          const xOffset = x['time offset'];
-          y.utcOffset(xOffset);
-          return valueT(x) <= valueT(y);
-        } if (x.isDtd && y.isDtd) {
-          return valueDTD(x) <= valueDTD(y);
-        } if (x.isYmd && y.isYmd) {
-          return valueYMD(x) <= valueYMD(y);
-        }
-        throw new Error(`${x.type || typeof x} <= ${y.type || typeof y} : operation unsupported for one or more operands types`);
+    if (presencetypeEq(x, y)) {
+      if (typeof x === 'number' && typeof y === 'number') {
+        return Big(x).lte(y);
+      } if (typeof x === 'string' && typeof y === 'string') {
+        return x <= y;
+      } if (x instanceof Date && y instanceof Date) {
+        return x <= y;
+      } if (x.isDate && y.isDate) {
+        const checkLt = checkInequality('<', '>'); // eslint-disable-line no-use-before-define
+        return checkLt(x, y, dateTimeComponent.date) >= 0; // eslint-disable-line no-use-before-define
+      } if (x.isDateTime && y.isDateTime) {
+        return valueDT(x) <= valueDT(y);
+      } if (x.isTime && y.isTime) {
+        // make y with the same offset as x before comparison
+        const xOffset = x['time offset'];
+        y.utcOffset(xOffset);
+        return valueT(x) <= valueT(y);
+      } if (x.isDtd && y.isDtd) {
+        return valueDTD(x) <= valueDTD(y);
+      } if (x.isYmd && y.isYmd) {
+        return valueYMD(x) <= valueYMD(y);
       }
-      throw new Error(`${typeof x && x} <= ${typeof y && y} : operation invalid for one or more operands types`);
-    } catch (err) {
-      throw err;
+      throw new Error(`${x.type || typeof x} <= ${y.type || typeof y} : operation unsupported for one or more operands types`);
     }
+    throw new Error(`${typeof x && x} <= ${typeof y && y} : operation invalid for one or more operands types`);
   }),
   '>': _.curry((x, y) => {
     if (anyUndefined(x, y)) {
       return getUndefined(x, y);
     }
-    try {
-      if (presencetypeEq(x, y)) {
-        if (typeof x === 'number' && typeof y === 'number') {
-          return Big(x).gt(y);
-        } if (typeof x === 'string' && typeof y === 'string') {
-          return x > y;
-        } if (x instanceof Date && y instanceof Date) {
-          return x > y;
-        } if (x.isDate && y.isDate) {
-          const checkGt = checkInequality('>', '<'); // eslint-disable-line no-use-before-define
-          return checkGt(x, y, dateTimeComponent.date) > 0;
-        } if (x.isDateTime && y.isDateTime) {
-          return valueDT(x) > valueDT(y);
-        } if (x.isTime && y.isTime) {
-          // make y with the same offset as x before comparison
-          const xOffset = x['time offset'];
-          y.utcOffset(xOffset);
-          return valueT(x) > valueT(y);
-        } if (x.isDtd && y.isDtd) {
-          return valueDTD(x) > valueDTD(y);
-        } if (x.isYmd && y.isYmd) {
-          return valueYMD(x) > valueYMD(y);
-        }
-        throw new Error(`${x.type || typeof x} > ${y.type || typeof y} : operation unsupported for one or more operands types`);
+    if (presencetypeEq(x, y)) {
+      if (typeof x === 'number' && typeof y === 'number') {
+        return Big(x).gt(y);
+      } if (typeof x === 'string' && typeof y === 'string') {
+        return x > y;
+      } if (x instanceof Date && y instanceof Date) {
+        return x > y;
+      } if (x.isDate && y.isDate) {
+        const checkGt = checkInequality('>', '<'); // eslint-disable-line no-use-before-define
+        return checkGt(x, y, dateTimeComponent.date) > 0;
+      } if (x.isDateTime && y.isDateTime) {
+        return valueDT(x) > valueDT(y);
+      } if (x.isTime && y.isTime) {
+        // make y with the same offset as x before comparison
+        const xOffset = x['time offset'];
+        y.utcOffset(xOffset);
+        return valueT(x) > valueT(y);
+      } if (x.isDtd && y.isDtd) {
+        return valueDTD(x) > valueDTD(y);
+      } if (x.isYmd && y.isYmd) {
+        return valueYMD(x) > valueYMD(y);
       }
-      throw new Error(`${typeof x && x} > ${typeof y && y} : operation invalid for one or more operands types`);
-    } catch (err) {
-      throw err;
+      throw new Error(`${x.type || typeof x} > ${y.type || typeof y} : operation unsupported for one or more operands types`);
     }
+    throw new Error(`${typeof x && x} > ${typeof y && y} : operation invalid for one or more operands types`);
   }),
   '>=': _.curry((x, y) => {
     if (anyUndefined(x, y)) {
       return getUndefined(x, y);
     }
-    try {
-      if (presencetypeEq(x, y)) {
-        if (typeof x === 'number' && typeof y === 'number') {
-          return Big(x).gte(y);
-        } if (typeof x === 'string' && typeof y === 'string') {
-          return x >= y;
-        } if (x instanceof Date && y instanceof Date) {
-          return x >= y;
-        } if (x.isDate && y.isDate) {
-          const checkGt = checkInequality('>', '<'); // eslint-disable-line no-use-before-define
-          return checkGt(x, y, dateTimeComponent.date) >= 0; // eslint-disable-line no-use-before-define
-        } if (x.isDateTime && y.isDateTime) {
-          return valueDT(x) >= valueDT(y);
-        } if (x.isTime && y.isTime) {
-          // make y with the same offset as x before comparison
-          const xOffset = x['time offset'];
-          y.utcOffset(xOffset);
-          return valueT(x) >= valueT(y);
-        } if (x.isDtd && y.isDtd) {
-          return valueDTD(x) >= valueDTD(y);
-        } if (x.isYmd && y.isYmd) {
-          return valueYMD(x) >= valueYMD(y);
-        }
-        throw new Error(`${x.type || typeof x} >= ${y.type || typeof y} : operation unsupported for one or more operands types`);
+    if (presencetypeEq(x, y)) {
+      if (typeof x === 'number' && typeof y === 'number') {
+        return Big(x).gte(y);
+      } if (typeof x === 'string' && typeof y === 'string') {
+        return x >= y;
+      } if (x instanceof Date && y instanceof Date) {
+        return x >= y;
+      } if (x.isDate && y.isDate) {
+        const checkGt = checkInequality('>', '<'); // eslint-disable-line no-use-before-define
+        return checkGt(x, y, dateTimeComponent.date) >= 0; // eslint-disable-line no-use-before-define
+      } if (x.isDateTime && y.isDateTime) {
+        return valueDT(x) >= valueDT(y);
+      } if (x.isTime && y.isTime) {
+        // make y with the same offset as x before comparison
+        const xOffset = x['time offset'];
+        y.utcOffset(xOffset);
+        return valueT(x) >= valueT(y);
+      } if (x.isDtd && y.isDtd) {
+        return valueDTD(x) >= valueDTD(y);
+      } if (x.isYmd && y.isYmd) {
+        return valueYMD(x) >= valueYMD(y);
       }
-      throw new Error(`${typeof x && x} >= ${typeof y && y} : operation invalid for one or more operands types`);
-    } catch (err) {
-      throw err;
+      throw new Error(`${x.type || typeof x} >= ${y.type || typeof y} : operation unsupported for one or more operands types`);
     }
+    throw new Error(`${typeof x && x} >= ${typeof y && y} : operation invalid for one or more operands types`);
   }),
   '==': _.curry((x, y) => {
     if (anyUndefined(x, y)) {
       return getUndefined(x, y);
     }
-    try {
-      if (x === null && y === null) {
-        return true;
-      } if ((x === null) !== (y === null)) {
-        return false;
-      } if (typeof x === 'number' && typeof y === 'number') {
-        return Big(x).eq(y);
-      } if (typeof x === 'string' && typeof y === 'string') {
-        return x === y;
-      } if (x instanceof Date && y instanceof Date) {
-        return x.getTime() === y.getTime();
-      } if (typeof x === 'boolean' && typeof y === 'boolean') {
-        return x === y;
-      } if (x.isDate && y.isDate) {
-        return checkEquality(x, y, dateTimeComponent.date); // eslint-disable-line no-use-before-define
-      } if (x.isDateTime && y.isDateTime) {
-        // make y with the same offset as x before comparison
-        const xOffset = x['time offset'];
-        y.utcOffset(xOffset);
-        return checkEquality(x, y, dateTimeComponent.dateandtime); // eslint-disable-line no-use-before-define
-      } if (x.isTime && y.isTime) {
-        // make y with the same offset as x before comparison
-        const xOffset = x['time offset'];
-        y.utcOffset(xOffset);
-        return checkEquality(x, y, dateTimeComponent.time); // eslint-disable-line no-use-before-define
-      } if (x.isDtd && y.isDtd) {
-        return valueDTD(x) === valueDTD(y);
-      } if (x.isYmd && y.isYmd) {
-        return valueYMD(x) === valueYMD(y);
-      } if (x.isList && y.isList) {
-        return _.isEqual(x, y);
-      }
-      throw new Error(`${x.type || typeof x} = ${y.type || typeof y} : operation unsupported for one or more operands types`);
-    } catch (err) {
-      throw err;
+
+    if (x === null && y === null) {
+      return true;
+    } if ((x === null) !== (y === null)) {
+      return false;
+    } if (typeof x === 'number' && typeof y === 'number') {
+      return Big(x).eq(y);
+    } if (typeof x === 'string' && typeof y === 'string') {
+      return x === y;
+    } if (x instanceof Date && y instanceof Date) {
+      return x.getTime() === y.getTime();
+    } if (typeof x === 'boolean' && typeof y === 'boolean') {
+      return x === y;
+    } if (x.isDate && y.isDate) {
+      return checkEquality(x, y, dateTimeComponent.date); // eslint-disable-line no-use-before-define
+    } if (x.isDateTime && y.isDateTime) {
+      // make y with the same offset as x before comparison
+      const xOffset = x['time offset'];
+      y.utcOffset(xOffset);
+      return checkEquality(x, y, dateTimeComponent.dateandtime); // eslint-disable-line no-use-before-define
+    } if (x.isTime && y.isTime) {
+      // make y with the same offset as x before comparison
+      const xOffset = x['time offset'];
+      y.utcOffset(xOffset);
+      return checkEquality(x, y, dateTimeComponent.time); // eslint-disable-line no-use-before-define
+    } if (x.isDtd && y.isDtd) {
+      return valueDTD(x) === valueDTD(y);
+    } if (x.isYmd && y.isYmd) {
+      return valueYMD(x) === valueYMD(y);
+    } if (x.isList && y.isList) {
+      return _.isEqual(x, y);
     }
+    throw new Error(`${x.type || typeof x} = ${y.type || typeof y} : operation unsupported for one or more operands types`);
   }),
   '!=': _.curry((x, y) => {
-    try {
-      let equalsValue = operatorMap['=='](x, y);
-      if (equalsValue !== undefined) {
-        equalsValue = !equalsValue;
-      }
-      return equalsValue;
-    } catch (err) {
-      throw err;
+    let equalsValue = operatorMap['=='](x, y);
+    if (equalsValue !== undefined) {
+      equalsValue = !equalsValue;
     }
+    return equalsValue;
   }),
   '||': _.curry((x, y) => x || y),
   '&&': _.curry((x, y) => x && y),

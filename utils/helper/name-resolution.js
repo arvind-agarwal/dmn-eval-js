@@ -4,9 +4,12 @@
  *  Bangalore, India. All Rights Reserved.
  *
  */
+/* eslint no-restricted-syntax: 0 */
+/* eslint operator-assignment: 0 */
+/* eslint consistent-return: 0 */
 const nameResolutionOrder = ['kwargs', 'context', 'decisionMap', 'plugin'];
 
-const resolveName = (name, args) => {
+const resolveName = (name, args, isResult = false) => {
   let index = 0;
   for (const key of nameResolutionOrder) {
     let value;
@@ -49,8 +52,9 @@ const resolveName = (name, args) => {
     if (index === nameResolutionOrder.length - 1) {
       return value;
     }
-    index++;
+    index = index + 1;
   }
+  return undefined;
   // return args.context && args.context[name];
 };
 

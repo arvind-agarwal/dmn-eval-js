@@ -5,42 +5,43 @@
 *
 */
 
-const { forEach } = require('lodash');
 const _ = require('lodash');
-
+/* eslint consistent-return: 0 */
 
 // Get a property with dot notation in an object tree
 function getProperty(o, p) {
-  if(!p || !p?.split) return;
-  const ps = p.split(",");
+  if (!p || !p.split) return undefined;
+  const ps = p.split(',');
   let pv = o;
-  ps.forEach(m => {
-    if(pv === undefined || pv === null) return;
+  ps.forEach((m) => {
+    if (pv === undefined || pv === null) return undefined;
     const cv = pv[m];
     pv = cv;
-  })
+  });
   return pv;
 }
 
 // valueToFilter - will contain member name, deeper object can be accessed using . notation but not arrays
 // returnMember - In case we need resulting array to be flattend with single property name of the property
-// comparison Operator = > < <= >= 
-const filterList = (list, propertyToSearch, comparsionOperator, valueToFilter, returnMember ) => {
-  if(list === undefined || list === null) return list;
-  if(propertyToSearch === undefined || propertyToSearch === null) return false;
-  if(!Array.isArray(list)) throw new Error('operation unsupported on element of this type');
-  if(!comparsionOperator || comparsionOperator==="=") comparsionOperator = "==";
+// comparison Operator = > < <= >=
+const filterList = (list, propertyToSearch, comparsionOperatorParam, valueToFilter, returnMember) => {
+  let comparsionOperator = comparsionOperatorParam;
+  if (list === undefined || list === null) return list;
+  if (propertyToSearch === undefined || propertyToSearch === null) return false;
+  if (!Array.isArray(list)) throw new Error('operation unsupported on element of this type');
+  if (!comparsionOperator || comparsionOperator === '=') comparsionOperator = '==';
+  // eslint-disable-next-line
   const operatorMap = require('../../helper/fn-generator');
 
-  // list.filter(item => item[propertyToSearch] === valueToFilter ) 
+  // list.filter(item => item[propertyToSearch] === valueToFilter )
   const resultArray = [];
-  list.forEach(item => {
+  list.forEach((item) => {
     const propValue = getProperty(item, propertyToSearch);
     let comparisonResult = false;
     comparisonResult = operatorMap(comparsionOperator)(propValue, valueToFilter);
 
-    if(comparisonResult) {
-      if(returnMember) {
+    if (comparisonResult) {
+      if (returnMember) {
         const value = getProperty(item, returnMember);
         resultArray.push(value);
       } else {
@@ -159,13 +160,12 @@ const append = (list, element) => {
   }
 };
 
-const concatenate = (...args) =>
-  args.reduce((result, next) => {
-    if (Array.isArray(next)) {
-      return Array.prototype.concat(result, next);
-    }
-    return result;
-  }, []);
+const concatenate = (...args) => args.reduce((result, next) => {
+  if (Array.isArray(next)) {
+    return Array.prototype.concat(result, next);
+  }
+  return result;
+}, []);
 
 const insertBefore = (list, position, newItem) => {
   if (list === undefined || list === null) {
@@ -282,5 +282,5 @@ module.exports = {
   union,
   'distinct values': distinctValues,
   flatten,
-  'filterlist': filterList
+  filterlist: filterList,
 };

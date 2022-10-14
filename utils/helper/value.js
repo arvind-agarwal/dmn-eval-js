@@ -12,6 +12,7 @@ value and valueInverse functions for each of the time, date, date_and_time and d
 These functions are not exposed as a part of in-built function suite.
 These are used for performing calculations and conversions.
 */
+/* eslint camelcase: 0 */
 
 const moment = require('moment-timezone');
 const { time, 'date and time': dateAndTime, duration } = require('../built-in-functions');

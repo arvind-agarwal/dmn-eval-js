@@ -4,6 +4,8 @@
 *  Bangalore, India. All Rights Reserved.
 *
 */
+/* eslint camelcase: 0 */
+
 const moment = require('moment');
 
 const { time_ISO_8601, date_ISO_8601 } = require('../../helper/meta');

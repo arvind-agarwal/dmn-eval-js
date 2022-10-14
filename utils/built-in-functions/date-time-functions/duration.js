@@ -22,6 +22,7 @@ Format : years_and_months_duration(from, to) // both are date_and_time
 Description : return years and months duration between "from" and "to"
 e.g. : years and months duration(date("2011-12-22"), date("2013-08-24")) = duration("P1Y8M")
 */
+/* eslint camelcase: 0 */
 
 const moment = require('moment');
 const addProperties = require('./add-properties');
@@ -88,17 +89,9 @@ const duration = (arg) => {
   if (arg !== null && arg !== undefined) {
     if (typeof arg === 'string') {
       if (patternMatch(arg, ymd_ISO_8601)) {
-        try {
-          result = yearsAndMonthsDuration(arg);
-        } catch (err) {
-          throw err;
-        }
+        result = yearsAndMonthsDuration(arg);
       } else if (patternMatch(arg, dtd_ISO_8601)) {
-        try {
-          result = daysAndTimeDuration(arg);
-        } catch (err) {
-          throw err;
-        }
+        result = daysAndTimeDuration(arg);
       }
       if (result === undefined) {
         throw new Error('Invalid Format : "duration" built-in function. Please check the input format');

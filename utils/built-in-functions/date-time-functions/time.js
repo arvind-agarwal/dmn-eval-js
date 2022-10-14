@@ -27,6 +27,7 @@ Format : time(hour, minute, second, offset)
 Description : hour, minute, second, are numbers, offset is a days and time duration, or null creates a time from the given component values
 e.g. : time(“T23:59:00z") = time(23, 59, 0, duration(“PT0H”))
 */
+/* eslint camelcase: 0 */
 
 const moment = require('moment-timezone');
 const addProperties = require('./add-properties');
@@ -45,15 +46,11 @@ const props = {
 const isNumber = (args) => args.reduce((prev, next) => prev && typeof next === 'number', true);
 
 const parseTime = (str) => {
-  try {
-    const t = moment.parseZone(str, time_ISO_8601);
-    if (t.isValid()) {
-      return t;
-    }
-    throw new Error('Invalid ISO_8601 format time. This is usually caused by an inappropriate format. Please check the input format.');
-  } catch (err) {
-    throw err;
+  const t = moment.parseZone(str, time_ISO_8601);
+  if (t.isValid()) {
+    return t;
   }
+  throw new Error('Invalid ISO_8601 format time. This is usually caused by an inappropriate format. Please check the input format.');
 };
 
 const dtdToOffset = (dtd) => {
@@ -83,15 +80,11 @@ const parseIANATz = (str) => {
   if (match) {
     const [hour, minute, second, tz] = match.slice(1);
     if (hour && minute && second && tz) {
-      try {
-        const t = moment.tz({ hour, minute, second }, tz);
-        if (t.isValid()) {
-          return t;
-        }
-        throw new Error('Invalid IANA format time. This is usually caused by an inappropriate format. Please check the input format.');
-      } catch (err) {
-        throw err;
+      const t = moment.tz({ hour, minute, second }, tz);
+      if (t.isValid()) {
+        return t;
       }
+      throw new Error('Invalid IANA format time. This is usually caused by an inappropriate format. Please check the input format.');
     }
     throw new Error(`Error parsing IANA format input. One or more parts are missing - hour : ${hour} minute : ${minute} second : ${second} timezone : ${tz}`);
   }
@@ -105,11 +98,7 @@ const time = (...args) => {
     const arg = args[0];
     if (arg !== null && arg !== undefined) {
       if (typeof arg === 'string') {
-        try {
-          t = arg === '' ? moment() : parseIANATz(arg) || parseTime(arg);
-        } catch (err) {
-          throw err;
-        }
+        t = arg === '' ? moment() : parseIANATz(arg) || parseTime(arg);
       } else if (typeof arg === 'object') {
         if (arg instanceof Date) {
           t = moment.parseZone(arg.toISOString);

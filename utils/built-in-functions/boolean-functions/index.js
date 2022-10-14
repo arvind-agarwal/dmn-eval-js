@@ -4,5 +4,5 @@
 *  Bangalore, India. All Rights Reserved.
 *
 */
-
+/* eslint global-require: 0 */
 module.exports = { ...require('./not') };

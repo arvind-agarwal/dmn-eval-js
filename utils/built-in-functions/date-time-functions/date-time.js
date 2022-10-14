@@ -21,6 +21,7 @@ Format : date and time(from) // from - date time string
 Description : date time string convert "from" to a date and time
 e.g. : date and time("2012-12-24T23:59:00") + duration("PT1M") = date and time("2012-12-25T00:00:00")
 */
+/* eslint camelcase: 0 */
 
 const moment = require('moment-timezone');
 const addProperties = require('./add-properties');
@@ -40,15 +41,11 @@ const parseIANATz = (str) => {
   if (match) {
     const [dateTime, timeZone] = match.slice(1);
     if (dateTime && timeZone) {
-      try {
-        const dt = moment(dateTime).tz(timeZone);
-        if (dt.isValid()) {
-          return dt;
-        }
-        throw new Error('Invalid date and time in IANA tz format. Please check the input format');
-      } catch (err) {
-        throw err;
+      const dt = moment(dateTime).tz(timeZone);
+      if (dt.isValid()) {
+        return dt;
       }
+      throw new Error('Invalid date and time in IANA tz format. Please check the input format');
     }
     throw new Error(`Error parsing IANA format input. One or more parts are missing. DateTimePart : ${dateTime} TimeZonePart : ${timeZone}`);
   }
@@ -71,11 +68,7 @@ const dateAndTime = (...args) => {
       } else {
         throw new Error(`Invalid argument for date_and_time function: ${arg}`);
       }
-      try {
-        dt = str === '' ? moment() : parseIANATz(str) || moment.parseZone(str);
-      } catch (err) {
-        throw err;
-      }
+      dt = str === '' ? moment() : parseIANATz(str) || moment.parseZone(str);
       if (!dt || !dt.isValid()) {
         throw new Error('Invalid date_and_time. This is usually caused by an invalid format. Please check the input format');
       }

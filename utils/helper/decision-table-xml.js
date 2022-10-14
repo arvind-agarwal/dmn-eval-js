@@ -55,7 +55,7 @@ function parseRule(rule, idx) {
 
 function parseDecisionLogic(decisionId, decisionLogic) {
   if ((decisionLogic.hitPolicy !== 'FIRST') && (decisionLogic.hitPolicy !== 'UNIQUE')
-      && (decisionLogic.hitPolicy !== 'COLLECT') && (decisionLogic.hitPolicy !== 'RULE ORDER')) {
+    && (decisionLogic.hitPolicy !== 'COLLECT') && (decisionLogic.hitPolicy !== 'RULE ORDER')) {
     throw new Error(`Unsupported hit policy ${decisionLogic.hitPolicy}`);
   }
   const parseddecisionLogic = {
@@ -128,7 +128,8 @@ function parseDecisions(drgElements) {
 
 async function parseDmnXml(xml, opts) {
   const dmnContent = await readDmnXml(xml, opts);
-  const decisions = parseDecisions(dmnContent?.rootElement?.drgElement);
+  if (!dmnContent || !dmnContent.rootElement || !dmnContent.rootElement.drgElement) throw new Error('Invalid or No DMN XML');
+  const decisions = parseDecisions(dmnContent.rootElement.drgElement);
   return decisions;
 }
 

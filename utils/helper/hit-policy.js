@@ -35,7 +35,7 @@ output list (outside the decision table).
 NOTE : Decision tables with compound outputs support only the following hit policies: Unique, Any, Priority, First, Output
 order, Rule order and Collect without operator, because the collect operator is undefined over multiple outputs.
 */
-
+/* eslint prefer-destructuring: 0 */
 const _ = require('lodash');
 
 const getDistinct = (arr) => arr.filter((item, index, arr) => arr.indexOf(item) === index);

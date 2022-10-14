@@ -10,7 +10,7 @@ const logger = require('loglevel').getLogger('dmn-eval-js');
 const fnGen = require('../utils/helper/fn-generator');
 const addKwargs = require('../utils/helper/add-kwargs');
 const builtInFns = require('../utils/built-in-functions');
-const resolveName = require('../utils/helper/name-resolution.js');
+const resolveName = require('../utils/helper/name-resolution');
 
 module.exports = function (ast) {
   ast.ProgramNode.prototype.build = function (data = {}, env = {}, type = 'output') {

@@ -27,6 +27,7 @@ Format : date(year, month, day) // year, month, day are numbers
 Description : creates a date from year, month, day component values
 e.g. : date(2012, 12, 25) = date("2012-12-25")
 */
+/* eslint camelcase: 0 */
 
 const moment = require('moment-timezone');
 const addProperties = require('./add-properties');
@@ -60,11 +61,7 @@ const date = (...args) => {
     const arg = args[0];
     if (arg !== null && arg !== undefined) {
       if (typeof arg === 'string') {
-        try {
-          d = arg === '' ? moment.parseZone(UTCTimePart, time_ISO_8601) : parseDate(arg);
-        } catch (err) {
-          throw err;
-        }
+        d = arg === '' ? moment.parseZone(UTCTimePart, time_ISO_8601) : parseDate(arg);
       } else if (typeof arg === 'object') {
         if (arg instanceof Date) {
           const ISO = arg.toISOString();
