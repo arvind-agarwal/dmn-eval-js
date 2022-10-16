@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" id="levels" name="definitions" namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="level1" name="level1">
+    <decisionTable id="decisionTable_1" hitPolicy="FIRST">
+      <input id="input1" label="">
+        <inputExpression id="inputExpression1" typeRef="string">
+          <text>input1</text>
+        </inputExpression>
+      </input>
+      <output id="output1" label="" name="varlevel1" typeRef="string" />
+      <rule id="DecisionRule_1s7ozrh">
+        <inputEntry id="UnaryTests_0cvt60t">
+          <text>1</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0ya19wq">
+          <text>"level1-1"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_17sm04y">
+        <inputEntry id="UnaryTests_0cw71n2">
+          <text>2</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0uf7x9z">
+          <text>"level2-2"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1mitspy">
+        <inputEntry id="UnaryTests_0m13hqi">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1opfqbz">
+          <text>"level-else"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <decision id="level2" name="Level2">
+    <informationRequirement id="InformationRequirement_1suwlmg">
+      <requiredDecision href="#level1" />
+    </informationRequirement>
+    <decisionTable id="DecisionTable_10uv4z9" hitPolicy="FIRST">
+      <input id="InputClause_0bnnstr">
+        <inputExpression id="LiteralExpression_1otxppt" typeRef="string">
+          <text>varlevel1</text>
+        </inputExpression>
+      </input>
+      <output id="OutputClause_0rxtoyn" name="varlevel2" typeRef="string" />
+      <rule id="DecisionRule_1qof9xk">
+        <inputEntry id="UnaryTests_1ic80kg">
+          <text>"level1-1"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0b8f7qb">
+          <text>"level2-1"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_16wgloa">
+        <inputEntry id="UnaryTests_026q2ak">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0lwvc96">
+          <text>"level2-else"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <decision id="level3" name="Level3">
+    <informationRequirement id="InformationRequirement_0i39lj3">
+      <requiredDecision href="#level2" />
+    </informationRequirement>
+    <decisionTable id="DecisionTable_1tuez3n" hitPolicy="FIRST">
+      <input id="InputClause_1qc15sh">
+        <inputExpression id="LiteralExpression_09tpw3z" typeRef="string">
+          <text>varlevel2</text>
+        </inputExpression>
+      </input>
+      <output id="OutputClause_0p8ph25" name="varlevel3" typeRef="string" />
+      <rule id="DecisionRule_1laarzg">
+        <inputEntry id="UnaryTests_06d377o">
+          <text>"level2-1"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0dejrua">
+          <text>"level3-1"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1lltzph">
+        <inputEntry id="UnaryTests_14srrkq">
+          <text>"level2-else"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_12k4hrf">
+          <text>"level3-2"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram id="DMNDiagram_1nnck0u">
+      <dmndi:DMNShape id="DMNShape_0thkzqa" dmnElementRef="level1">
+        <dc:Bounds height="80" width="180" x="80" y="180" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_0cpowq6" dmnElementRef="InformationRequirement_1suwlmg">
+        <di:waypoint x="260" y="220" />
+        <di:waypoint x="330" y="220" />
+        <di:waypoint x="350" y="220" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape id="DMNShape_1ry06yx" dmnElementRef="level2">
+        <dc:Bounds height="80" width="180" x="350" y="180" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="DMNShape_0okym8x" dmnElementRef="level3">
+        <dc:Bounds height="80" width="180" x="640" y="180" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_0qno1p5" dmnElementRef="InformationRequirement_0i39lj3">
+        <di:waypoint x="530" y="220" />
+        <di:waypoint x="620" y="220" />
+        <di:waypoint x="640" y="220" />
+      </dmndi:DMNEdge>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

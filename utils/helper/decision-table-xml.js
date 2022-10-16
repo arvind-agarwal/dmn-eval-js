@@ -248,11 +248,11 @@ function evaluateRule(rule, resolvedInputExpressions, outputNames, context) {
   return { matched: true, output: outputObject };
 }
 
-function evaluateDecision(decisionId, decisions, context, alreadyEvaluatedDecisions) {
-  const mergedResult = {};
+function evaluateDecision(decisionId, decisions, context, alreadyEvaluatedDecisions, mergedResult) {
   if (!alreadyEvaluatedDecisions) {
     alreadyEvaluatedDecisions = []; // eslint-disable-line no-param-reassign
   }
+  if(!mergedResult) mergedResult = {};
 
   let decisionKeys = [decisionId];
   // If no decisionId is passed, we can process all decisions
@@ -288,9 +288,9 @@ function evaluateDecision(decisionId, decisions, context, alreadyEvaluatedDecisi
       // check if the decision was already executed, to prevent unecessary evaluations if multiple decisions require the same decision
       if (!alreadyEvaluatedDecisions[reqDecision]) {
         logger.debug(`Need to evaluate required decision ${reqDecision}`);
-        const requiredResult = evaluateDecision(reqDecision, decisions, context, alreadyEvaluatedDecisions); // eslint-disable-line no-await-in-loop
+        const requiredResult = evaluateDecision(reqDecision, decisions, context, alreadyEvaluatedDecisions, mergedResult); // eslint-disable-line no-await-in-loop
         mergeContext(context, requiredResult);
-        mergedResult[reqDecision] = requiredResult; // store in merged result as decisionId: output format
+        // mergedResult[reqDecision] = requiredResult; // store in merged result as decisionId: output format
         // if (mergeResults) mergedResult = {...mergedResult, ...decisionResult};
         alreadyEvaluatedDecisions[reqDecision] = true; // eslint-disable-line no-param-reassign
       }
