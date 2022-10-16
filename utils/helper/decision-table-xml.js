@@ -252,7 +252,7 @@ function evaluateDecision(decisionId, decisions, context, alreadyEvaluatedDecisi
   if (!alreadyEvaluatedDecisions) {
     alreadyEvaluatedDecisions = []; // eslint-disable-line no-param-reassign
   }
-  if(!mergedResult) mergedResult = {};
+  if (!mergedResult) mergedResult = {}; // eslint-disable-line no-param-reassign
 
   let decisionKeys = [decisionId];
   // If no decisionId is passed, we can process all decisions
@@ -375,7 +375,7 @@ function evaluateDecision(decisionId, decisions, context, alreadyEvaluatedDecisi
     }
     // This is root Keys of all decisions or specific decision
     // Hence we merge irrespective of mergeResult flag.
-    mergedResult[decId] = decisionResult;
+    mergedResult[decId] = decisionResult; // eslint-disable-line no-param-reassign
     if (decisionId) singleDecisionResult = decisionResult;
   });
   if (decisionId) return singleDecisionResult;
