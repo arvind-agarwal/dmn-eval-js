@@ -99,6 +99,38 @@ describe(chalk.blue('Parse and evaluate decision tables'), function() {
     }).catch(err => done(err));
   });
 
+  it('Evaluation decision table with required decision with merged results', function(done) {
+    decisionTable.parseDmnXml(readFile("./test/data/test.dmn")).then(decisions => {
+      expect(decisions['decisionPrimary']).not.to.be.undefined;
+      const context = {
+        input: {
+          category: "E",
+          referenceDate: new Date("2018-01-04T00:00:00+00:00"),
+          testDate: new Date("2018-01-03T00:00:00+00:00"),
+        }
+      };
+      let output = decisionTable.evaluateAllDecisions(decisions, context);
+      let data = output['decisionPrimary'];
+      expect(data.output.score).to.equal(50);
+
+      data = output['decisionDependent'];
+      expect(moment.isMoment(data.periodBegin)).to.be.true;
+      expect(data.periodBegin.isSame(dateTime.date("2018-01-04"))).to.be.true;
+      expect(moment.isDuration(data.periodDuration)).to.be.true;
+      expect(data.periodDuration.months).to.equal(3);
+      
+      context.input.testDate = new Date("2018-04-04T00:00:00+00:00");
+      data = decisionTable.evaluateDecision('decisionPrimary', decisions, context);
+      expect(data.output.score).to.equal(100);
+      context.input.testDate = new Date("2018-04-05T00:00:00+00:00");
+      data = decisionTable.evaluateDecision('decisionPrimary', decisions, context);
+      expect(data.output.score).to.equal(0);
+
+      done();
+    }).catch(err => done(err));
+  });
+
+
   it('Evaluation decision table with hit policy COLLECT', function(done) {
     decisionTable.parseDmnXml(readFile("./test/data/test-collect.dmn")).then(decisions => {
       expect(decisions['decision']).not.to.be.undefined;

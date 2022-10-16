@@ -226,97 +226,132 @@ function evaluateRule(rule, resolvedInputExpressions, outputNames, context) {
   return { matched: true, output: outputObject };
 }
 
+function evaluateAllDecisions(decisions, context) {
+  return evaluateDecision(undefined, decisions, context);
+}
+
 function evaluateDecision(decisionId, decisions, context, alreadyEvaluatedDecisions) {
+  let mergedResult = {};
   if (!alreadyEvaluatedDecisions) {
     alreadyEvaluatedDecisions = []; // eslint-disable-line no-param-reassign
   }
-  const decision = decisions[decisionId];
-  if (decision === undefined) {
-    throw new Error(`No such decision "${decisionId}"`);
-  }
 
-  // execute required decisions recursively first
-  for (let i = 0; i < decision.requiredDecisions.length; i += 1) {
-    const reqDecision = decision.requiredDecisions[i];
-    // check if the decision was already executed, to prevent unecessary evaluations if multiple decisions require the same decision
-    if (!alreadyEvaluatedDecisions[reqDecision]) {
-      logger.debug(`Need to evaluate required decision ${reqDecision}`);
-      const requiredResult = evaluateDecision(reqDecision, decisions, context, alreadyEvaluatedDecisions); // eslint-disable-line no-await-in-loop
-      mergeContext(context, requiredResult);
-      alreadyEvaluatedDecisions[reqDecision] = true; // eslint-disable-line no-param-reassign
-    }
-  }
-  logger.info(`Evaluating decision "${decisionId}"...`);
-  logger.debug(`Context: ${JSON.stringify(context)}`);
-  const { decisionLogic } = decision;
-
-  // resolve input expressions
-  const resolvedInputExpressions = [];
-  for (let i = 0; i < decisionLogic.parsedInputExpressions.length; i += 1) {
-    const parsedInputExpression = decisionLogic.parsedInputExpressions[i];
-    const plainInputExpression = decisionLogic.inputExpressions[i];
-    try {
-      const resolvedInputExpression = parsedInputExpression.build(context); // eslint-disable-line no-await-in-loop
-      // check if the input expression is to be treated as an input variable - this is the case if it is a qualified name
-      let inputVariableName;
-      if (parsedInputExpression.simpleExpressions && parsedInputExpression.simpleExpressions[0].type === 'QualifiedName') {
-        inputVariableName = parsedInputExpression.simpleExpressions[0].names.map((nameNode) => nameNode.nameChars).join('.');
-      }
-      resolvedInputExpressions.push({ value: resolvedInputExpression[0], inputVariableName });
-    } catch (err) {
-      throw new Error(`Failed to evaluate input expression ${plainInputExpression} of decision ${decisionId}: ${err}`);
-    }
-  }
-
-  // initialize the result to an object with undefined output values (hit policy FIRST or UNIQUE) or to an empty array (hit policy COLLECT or RULE ORDER)
-  const decisionResult = (decisionLogic.hitPolicy === 'FIRST') || (decisionLogic.hitPolicy === 'UNIQUE') ? {} : [];
-  decisionLogic.outputNames.forEach((outputName) => {
-    if ((decisionLogic.hitPolicy === 'FIRST') || (decisionLogic.hitPolicy === 'UNIQUE')) {
-      setOrAddValue(outputName, decisionResult, undefined);
-    }
-  });
-
-  // iterate over the rules of the decision table of the requested decision,
-  // and either return the output of the first matching rule (hit policy FIRST)
-  // or collect the output of all matching rules (hit policy COLLECT)
-  let hasMatch = false;
-  for (let i = 0; i < decisionLogic.rules.length; i += 1) {
-    const rule = decisionLogic.rules[i];
-    let ruleResult;
-    try {
-      ruleResult = evaluateRule(rule, resolvedInputExpressions, decisionLogic.outputNames, context); // eslint-disable-line no-await-in-loop
-    } catch (err) {
-      throw new Error(`Failed to evaluate rule ${rule.number} of decision ${decisionId}:  ${err}`);
-    }
-    if (ruleResult.matched) {
-      // only one match for hit policy UNIQUE!
-      if (hasMatch && (decisionLogic.hitPolicy === 'UNIQUE')) {
-        throw new Error(`Decision "${decisionId}" is not unique but hit policy is UNIQUE.`);
-      }
-      hasMatch = true;
-      logger.info(`Result for decision "${decisionId}": ${JSON.stringify(ruleResult.output)} (rule ${i + 1} matched)`);
-
-      // merge the result of the matched rule
-      if ((decisionLogic.hitPolicy === 'FIRST') || (decisionLogic.hitPolicy === 'UNIQUE')) {
-        decisionLogic.outputNames.forEach((outputName) => {
-          const resolvedOutput = resolveExpression(outputName, ruleResult.output);
-          if (resolvedOutput !== undefined || decisionLogic.hitPolicy === 'FIRST' || decisionLogic.hitPolicy === 'UNIQUE') {
-            setOrAddValue(outputName, decisionResult, resolvedOutput);
-          }
-        });
-        if (decisionLogic.hitPolicy === 'FIRST') {
-          // no more rule results in this case
-          break;
+  let decisionKeys = [decisionId];
+  // If no decisionId is passed, we can process all decisions
+  if (!decisionId) {
+    // If a decision is required Decision for some other decision, ignore it
+    // since that decision will be run by the other decision anyway
+    decisionKeys = Object.entries(decisions).map(([k]) => k);
+    Object.entries(decisions).forEach(([k, v]) => {
+      // console.log("k", k, "v", v, v?.requiredDecisions);
+      for (const r of v?.requiredDecisions) {
+        //console.log('removing ', r);
+        const index = decisionKeys.indexOf(r);
+        if (index !== -1) {
+          decisionKeys.splice(index, 1);
         }
-      } else {
-        decisionResult.push(ruleResult.output);
+      }
+    });
+    // console.log(rootKeys);
+  }
+
+  let singleDecisionResult;
+  decisionKeys.forEach((decId) => {
+    const decision = decisions[decId];
+    if (decision === undefined) {
+      throw new Error(`No such decision "${decId}"`);
+    }
+
+    // execute required decisions recursively first
+    for (let i = 0; i < decision.requiredDecisions.length; i += 1) {
+      const reqDecision = decision.requiredDecisions[i];
+      // check if the decision was already executed, to prevent unecessary evaluations if multiple decisions require the same decision
+      if (!alreadyEvaluatedDecisions[reqDecision]) {
+        logger.debug(`Need to evaluate required decision ${reqDecision}`);
+        const requiredResult = evaluateDecision(reqDecision, decisions, context, alreadyEvaluatedDecisions); // eslint-disable-line no-await-in-loop
+        mergeContext(context, requiredResult);
+        mergedResult[reqDecision] = requiredResult; // store in merged result as decisionId: output format
+        // if (mergeResults) mergedResult = {...mergedResult, ...decisionResult};
+        alreadyEvaluatedDecisions[reqDecision] = true; // eslint-disable-line no-param-reassign
       }
     }
-  }
-  if (!hasMatch && decisionLogic.rules.length > 0) {
-    logger.warn(`No rule matched for decision "${decisionId}".`);
-  }
-  return decisionResult;
+    logger.info(`Evaluating decision "${decId}"...`);
+    logger.debug(`Context: ${JSON.stringify(context)}`);
+    const { decisionLogic } = decision;
+
+    // resolve input expressions
+    const resolvedInputExpressions = [];
+    for (let i = 0; i < decisionLogic.parsedInputExpressions.length; i += 1) {
+      const parsedInputExpression = decisionLogic.parsedInputExpressions[i];
+      const plainInputExpression = decisionLogic.inputExpressions[i];
+      try {
+        const resolvedInputExpression = parsedInputExpression.build(context); // eslint-disable-line no-await-in-loop
+        // check if the input expression is to be treated as an input variable - this is the case if it is a qualified name
+        let inputVariableName;
+        if (parsedInputExpression.simpleExpressions && parsedInputExpression.simpleExpressions[0].type === 'QualifiedName') {
+          inputVariableName = parsedInputExpression.simpleExpressions[0].names.map((nameNode) => nameNode.nameChars).join('.');
+        }
+        resolvedInputExpressions.push({ value: resolvedInputExpression[0], inputVariableName });
+      } catch (err) {
+        throw new Error(`Failed to evaluate input expression ${plainInputExpression} of decision ${decId}: ${err}`);
+      }
+    }
+
+    // initialize the result to an object with undefined output values (hit policy FIRST or UNIQUE) or to an empty array (hit policy COLLECT or RULE ORDER)
+    const decisionResult = (decisionLogic.hitPolicy === 'FIRST') || (decisionLogic.hitPolicy === 'UNIQUE') ? {} : [];
+    decisionLogic.outputNames.forEach((outputName) => {
+      if ((decisionLogic.hitPolicy === 'FIRST') || (decisionLogic.hitPolicy === 'UNIQUE')) {
+        setOrAddValue(outputName, decisionResult, undefined);
+      }
+    });
+
+    // iterate over the rules of the decision table of the requested decision,
+    // and either return the output of the first matching rule (hit policy FIRST)
+    // or collect the output of all matching rules (hit policy COLLECT)
+    let hasMatch = false;
+    for (let i = 0; i < decisionLogic.rules.length; i += 1) {
+      const rule = decisionLogic.rules[i];
+      let ruleResult;
+      try {
+        ruleResult = evaluateRule(rule, resolvedInputExpressions, decisionLogic.outputNames, context); // eslint-disable-line no-await-in-loop
+      } catch (err) {
+        throw new Error(`Failed to evaluate rule ${rule.number} of decision ${decId}:  ${err}`);
+      }
+      if (ruleResult.matched) {
+        // only one match for hit policy UNIQUE!
+        if (hasMatch && (decisionLogic.hitPolicy === 'UNIQUE')) {
+          throw new Error(`Decision "${decId}" is not unique but hit policy is UNIQUE.`);
+        }
+        hasMatch = true;
+        logger.info(`Result for decision "${decId}": ${JSON.stringify(ruleResult.output)} (rule ${i + 1} matched)`);
+
+        // merge the result of the matched rule
+        if ((decisionLogic.hitPolicy === 'FIRST') || (decisionLogic.hitPolicy === 'UNIQUE')) {
+          decisionLogic.outputNames.forEach((outputName) => {
+            const resolvedOutput = resolveExpression(outputName, ruleResult.output);
+            if (resolvedOutput !== undefined || decisionLogic.hitPolicy === 'FIRST' || decisionLogic.hitPolicy === 'UNIQUE') {
+              setOrAddValue(outputName, decisionResult, resolvedOutput);
+            }
+          });
+          if (decisionLogic.hitPolicy === 'FIRST') {
+            // no more rule results in this case
+            break;
+          }
+        } else {
+          decisionResult.push(ruleResult.output);
+        }
+      }
+    }
+    if (!hasMatch && decisionLogic.rules.length > 0) {
+      logger.warn(`No rule matched for decision "${decId}".`);
+    }
+    // This is root Keys of all decisions or specific decision
+    // Hence we merge irrespective of mergeResult flag.
+    mergedResult[decId] = decisionResult;
+    if(decisionId) singleDecisionResult = decisionResult;
+  });
+  if(decisionId) return singleDecisionResult;
+  return mergedResult;
 }
 
 function dumpTree(node, indent) {
@@ -366,5 +401,5 @@ function dumpTree(node, indent) {
 }
 
 module.exports = {
-  readDmnXml, parseDmnXml, parseDecisions, evaluateDecision, dumpTree,
+  readDmnXml, parseDmnXml, parseDecisions, evaluateDecision, dumpTree, evaluateAllDecisions
 };
