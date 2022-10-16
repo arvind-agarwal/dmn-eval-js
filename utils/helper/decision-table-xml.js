@@ -56,20 +56,20 @@ function parseRule(rule, idx) {
 }
 
 function parseLiteralExpresionVariable(decisionId, decisionLogic, variableName) {
-  if (decisionLogic.expressionLanguage === 'feel') {
-    const parseddecisionLogic = {
-      isLiteralExpression: true,
-      variableName,
-      inputExpressions: [decisionLogic.text],
-    };
-    try {
-      const parsedExpression = feel.parse(decisionLogic.text, { startRule: 'SimpleExpressions' });
-      parseddecisionLogic.parsedInputExpressions = [parsedExpression];
-      return parseddecisionLogic;
-    } catch (err) {
-      throw new Error(`Failed to parse literal input expression ${decisionId} '${decisionLogic.text}': ${err}`);
-    }
-  } else throw new Error(`Unsupported expression language while parsing ${decisionId}`);
+  // if (decisionLogic.expressionLanguage === 'feel') {
+  const parseddecisionLogic = {
+    isLiteralExpression: true,
+    variableName,
+    inputExpressions: [decisionLogic.text],
+  };
+  try {
+    const parsedExpression = feel.parse(decisionLogic.text, { startRule: 'SimpleExpressions' });
+    parseddecisionLogic.parsedInputExpressions = [parsedExpression];
+    return parseddecisionLogic;
+  } catch (err) {
+    throw new Error(`Failed to parse literal input expression ${decisionId} '${decisionLogic.text}': ${err}`);
+  }
+  // } else throw new Error(`Unsupported expression language while parsing ${decisionId}`);
 }
 
 function parseDecisionLogic(decisionId, decisionLogic) {
