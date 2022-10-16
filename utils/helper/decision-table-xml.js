@@ -8,6 +8,8 @@ const moment = require('moment');
 const feel = require('../../dist/feel');
 
 function createModdle(additionalPackages, options) {
+  // eslint-disable-next-line new-cap
+  if (DmnModdle.default) return new DmnModdle.default(additionalPackages, options);
   return new DmnModdle(additionalPackages, options);
 }
 
