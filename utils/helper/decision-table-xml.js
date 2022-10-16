@@ -226,12 +226,8 @@ function evaluateRule(rule, resolvedInputExpressions, outputNames, context) {
   return { matched: true, output: outputObject };
 }
 
-function evaluateAllDecisions(decisions, context) {
-  return evaluateDecision(undefined, decisions, context);
-}
-
 function evaluateDecision(decisionId, decisions, context, alreadyEvaluatedDecisions) {
-  let mergedResult = {};
+  const mergedResult = {};
   if (!alreadyEvaluatedDecisions) {
     alreadyEvaluatedDecisions = []; // eslint-disable-line no-param-reassign
   }
@@ -242,13 +238,15 @@ function evaluateDecision(decisionId, decisions, context, alreadyEvaluatedDecisi
     // If a decision is required Decision for some other decision, ignore it
     // since that decision will be run by the other decision anyway
     decisionKeys = Object.entries(decisions).map(([k]) => k);
-    Object.entries(decisions).forEach(([k, v]) => {
+    Object.entries(decisions).forEach(([, v]) => {
       // console.log("k", k, "v", v, v?.requiredDecisions);
-      for (const r of v?.requiredDecisions) {
-        //console.log('removing ', r);
-        const index = decisionKeys.indexOf(r);
-        if (index !== -1) {
-          decisionKeys.splice(index, 1);
+      if (v && v.requiredDecisions) {
+        for (const r of v.requiredDecisions) { // eslint-disable-line  no-restricted-syntax
+          // console.log('removing ', r);
+          const index = decisionKeys.indexOf(r);
+          if (index !== -1) {
+            decisionKeys.splice(index, 1);
+          }
         }
       }
     });
@@ -348,10 +346,14 @@ function evaluateDecision(decisionId, decisions, context, alreadyEvaluatedDecisi
     // This is root Keys of all decisions or specific decision
     // Hence we merge irrespective of mergeResult flag.
     mergedResult[decId] = decisionResult;
-    if(decisionId) singleDecisionResult = decisionResult;
+    if (decisionId) singleDecisionResult = decisionResult;
   });
-  if(decisionId) return singleDecisionResult;
+  if (decisionId) return singleDecisionResult;
   return mergedResult;
+}
+
+function evaluateAllDecisions(decisions, context) {
+  return evaluateDecision(undefined, decisions, context);
 }
 
 function dumpTree(node, indent) {
@@ -401,5 +403,5 @@ function dumpTree(node, indent) {
 }
 
 module.exports = {
-  readDmnXml, parseDmnXml, parseDecisions, evaluateDecision, dumpTree, evaluateAllDecisions
+  readDmnXml, parseDmnXml, parseDecisions, evaluateDecision, dumpTree, evaluateAllDecisions,
 };
