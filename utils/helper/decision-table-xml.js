@@ -53,6 +53,23 @@ function parseRule(rule, idx) {
   return parsedRule;
 }
 
+function parseLiteralExpresionVariable(decisionId, decisionLogic, variableName) {
+  if (decisionLogic.expressionLanguage === 'feel') {
+    const parseddecisionLogic = {
+      isLiteralExpression: true,
+      variableName,
+      inputExpressions: [decisionLogic.text],
+    };
+    try {
+      const parsedExpression = feel.parse(decisionLogic.text, { startRule: 'SimpleExpressions' });
+      parseddecisionLogic.parsedInputExpressions = [parsedExpression];
+      return parseddecisionLogic;
+    } catch (err) {
+      throw new Error(`Failed to parse literal input expression ${decisionId} '${decisionLogic.text}': ${err}`);
+    }
+  } else throw new Error(`Unsupported expression language while parsing ${decisionId}`);
+}
+
 function parseDecisionLogic(decisionId, decisionLogic) {
   if ((decisionLogic.hitPolicy !== 'FIRST') && (decisionLogic.hitPolicy !== 'UNIQUE')
     && (decisionLogic.hitPolicy !== 'COLLECT') && (decisionLogic.hitPolicy !== 'RULE ORDER')) {
@@ -110,7 +127,12 @@ function parseDecisions(drgElements) {
   drgElements.forEach((drgElement) => {
     if (drgElement.decisionLogic) {
       // parse the decision table...
-      const decision = { decisionLogic: parseDecisionLogic(drgElement.id, drgElement.decisionLogic), requiredDecisions: [] };
+      let decision;
+      if (drgElement.variable && drgElement.variable.name) {
+        decision = { decisionLogic: parseLiteralExpresionVariable(drgElement.id, drgElement.decisionLogic, drgElement.variable.name), requiredDecisions: [] };
+      } else {
+        decision = { decisionLogic: parseDecisionLogic(drgElement.id, drgElement.decisionLogic), requiredDecisions: [] };
+      }
       // ...and collect the decisions on which the current decision depends
       if (drgElement.informationRequirement !== undefined) {
         drgElement.informationRequirement.forEach((req) => {
@@ -295,53 +317,61 @@ function evaluateDecision(decisionId, decisions, context, alreadyEvaluatedDecisi
       }
     }
 
-    // initialize the result to an object with undefined output values (hit policy FIRST or UNIQUE) or to an empty array (hit policy COLLECT or RULE ORDER)
-    const decisionResult = (decisionLogic.hitPolicy === 'FIRST') || (decisionLogic.hitPolicy === 'UNIQUE') ? {} : [];
-    decisionLogic.outputNames.forEach((outputName) => {
-      if ((decisionLogic.hitPolicy === 'FIRST') || (decisionLogic.hitPolicy === 'UNIQUE')) {
-        setOrAddValue(outputName, decisionResult, undefined);
-      }
-    });
-
-    // iterate over the rules of the decision table of the requested decision,
-    // and either return the output of the first matching rule (hit policy FIRST)
-    // or collect the output of all matching rules (hit policy COLLECT)
-    let hasMatch = false;
-    for (let i = 0; i < decisionLogic.rules.length; i += 1) {
-      const rule = decisionLogic.rules[i];
-      let ruleResult;
-      try {
-        ruleResult = evaluateRule(rule, resolvedInputExpressions, decisionLogic.outputNames, context); // eslint-disable-line no-await-in-loop
-      } catch (err) {
-        throw new Error(`Failed to evaluate rule ${rule.number} of decision ${decId}:  ${err}`);
-      }
-      if (ruleResult.matched) {
-        // only one match for hit policy UNIQUE!
-        if (hasMatch && (decisionLogic.hitPolicy === 'UNIQUE')) {
-          throw new Error(`Decision "${decId}" is not unique but hit policy is UNIQUE.`);
-        }
-        hasMatch = true;
-        logger.info(`Result for decision "${decId}": ${JSON.stringify(ruleResult.output)} (rule ${i + 1} matched)`);
-
-        // merge the result of the matched rule
+    let decisionResult;
+    if (decisionLogic.variableName) {
+      // In case it is just a direct variable assignment
+      if (!resolvedInputExpressions || !resolvedInputExpressions.length > 0 || !resolvedInputExpressions[0]) throw new Error('Invalid input expression detected or cannot be executed');
+      decisionResult = {};
+      setOrAddValue(decisionLogic.variableName, decisionResult, resolvedInputExpressions[0].value);
+    } else {
+      // initialize the result to an object with undefined output values (hit policy FIRST or UNIQUE) or to an empty array (hit policy COLLECT or RULE ORDER)
+      decisionResult = (decisionLogic.hitPolicy === 'FIRST') || (decisionLogic.hitPolicy === 'UNIQUE') ? {} : [];
+      decisionLogic.outputNames.forEach((outputName) => {
         if ((decisionLogic.hitPolicy === 'FIRST') || (decisionLogic.hitPolicy === 'UNIQUE')) {
-          decisionLogic.outputNames.forEach((outputName) => {
-            const resolvedOutput = resolveExpression(outputName, ruleResult.output);
-            if (resolvedOutput !== undefined || decisionLogic.hitPolicy === 'FIRST' || decisionLogic.hitPolicy === 'UNIQUE') {
-              setOrAddValue(outputName, decisionResult, resolvedOutput);
-            }
-          });
-          if (decisionLogic.hitPolicy === 'FIRST') {
-            // no more rule results in this case
-            break;
+          setOrAddValue(outputName, decisionResult, undefined);
+        }
+      });
+
+      // iterate over the rules of the decision table of the requested decision,
+      // and either return the output of the first matching rule (hit policy FIRST)
+      // or collect the output of all matching rules (hit policy COLLECT)
+      let hasMatch = false;
+      for (let i = 0; i < decisionLogic.rules.length; i += 1) {
+        const rule = decisionLogic.rules[i];
+        let ruleResult;
+        try {
+          ruleResult = evaluateRule(rule, resolvedInputExpressions, decisionLogic.outputNames, context); // eslint-disable-line no-await-in-loop
+        } catch (err) {
+          throw new Error(`Failed to evaluate rule ${rule.number} of decision ${decId}:  ${err}`);
+        }
+        if (ruleResult.matched) {
+          // only one match for hit policy UNIQUE!
+          if (hasMatch && (decisionLogic.hitPolicy === 'UNIQUE')) {
+            throw new Error(`Decision "${decId}" is not unique but hit policy is UNIQUE.`);
           }
-        } else {
-          decisionResult.push(ruleResult.output);
+          hasMatch = true;
+          logger.info(`Result for decision "${decId}": ${JSON.stringify(ruleResult.output)} (rule ${i + 1} matched)`);
+
+          // merge the result of the matched rule
+          if ((decisionLogic.hitPolicy === 'FIRST') || (decisionLogic.hitPolicy === 'UNIQUE')) {
+            decisionLogic.outputNames.forEach((outputName) => {
+              const resolvedOutput = resolveExpression(outputName, ruleResult.output);
+              if (resolvedOutput !== undefined || decisionLogic.hitPolicy === 'FIRST' || decisionLogic.hitPolicy === 'UNIQUE') {
+                setOrAddValue(outputName, decisionResult, resolvedOutput);
+              }
+            });
+            if (decisionLogic.hitPolicy === 'FIRST') {
+              // no more rule results in this case
+              break;
+            }
+          } else {
+            decisionResult.push(ruleResult.output);
+          }
         }
       }
-    }
-    if (!hasMatch && decisionLogic.rules.length > 0) {
-      logger.warn(`No rule matched for decision "${decId}".`);
+      if (!hasMatch && decisionLogic.rules.length > 0) {
+        logger.warn(`No rule matched for decision "${decId}".`);
+      }
     }
     // This is root Keys of all decisions or specific decision
     // Hence we merge irrespective of mergeResult flag.

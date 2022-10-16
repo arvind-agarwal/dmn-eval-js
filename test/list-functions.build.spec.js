@@ -24,6 +24,11 @@ describe(chalk.blue('Built-in list functions tests'), function () {
     const s1 = result.invoke(context.l1[0], context.l1[1]);
     expect(s1).to.be.true;
 
+    condition = 'some i in [1, 2, 3, 4, 5] satisfies (i % 2)=0';
+    parsedGrammar = FEEL.parse(condition);
+    result = parsedGrammar.build(context);
+    expect(result).to.be.true;
+
     condition = 'sort([5,4,21,3,1])';
     parsedGrammar = FEEL.parse(condition);
     result = parsedGrammar.build(context);

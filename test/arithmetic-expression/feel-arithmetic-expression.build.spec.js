@@ -15,11 +15,16 @@ describe(chalk.blue('Arithmetic expression ast parsing test'), function () {
     let parsedGrammar = FEEL.parse("round(26.222)");
     expect(parsedGrammar.build({})).to.equal(26);
 
+    parsedGrammar = FEEL.parse("37%4")
+    expect(parsedGrammar.build({})).to.equal(1);
+
     parsedGrammar = FEEL.parse("round(26.28933,2)")
     expect(parsedGrammar.build({})).to.equal(26.29);
   });
 
   it('Successfully builds ast from simple arithmetic expression', function () {
+
+
     var text = 'a + b - c';
     var _context = {
       a: 10,

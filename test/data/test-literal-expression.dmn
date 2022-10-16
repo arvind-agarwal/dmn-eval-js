@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" id="decisionVariableExpressions" name="definitions" namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="decisionTestVariable" name="Test Variable">
+    <variable id="testVariableAssignment" name="testvariable" typeRef="string" />
+    <literalExpression id="LiteralExpression_1t4yavb" expressionLanguage="feel">
+      <text>"Test" + "ing"</text>
+    </literalExpression>
+  </decision>
+  <decision id="depedentVar" name="Depedent Variable">
+    <variable id="InformationItem_07dfjiz" name="depedentVar" typeRef="boolean" />
+    <informationRequirement id="InformationRequirement_0lwte14">
+      <requiredDecision href="#decisionTestVariable" />
+    </informationRequirement>
+    <literalExpression id="LiteralExpression_0vmhnv6" expressionLanguage="feel">
+      <text>some item in [1, 2, 3, 4, 5] satisfies (item % 2)=0</text>
+    </literalExpression>
+  </decision>
+  <decision id="decisionTableBasedOnVariables" name="DT based on variables">
+    <informationRequirement id="InformationRequirement_1o1t4g2">
+      <requiredDecision href="#decisionTestVariable" />
+    </informationRequirement>
+    <informationRequirement id="InformationRequirement_14pk6do">
+      <requiredDecision href="#depedentVar" />
+    </informationRequirement>
+    <decisionTable id="DecisionTable_09powow" hitPolicy="FIRST">
+      <input id="InputClause_0onvycm">
+        <inputExpression id="LiteralExpression_1sn5rg7" typeRef="boolean">
+          <text>depedentVar</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_18udiyo">
+        <inputExpression id="LiteralExpression_06l2b4g" typeRef="string">
+          <text>testvariable</text>
+        </inputExpression>
+      </input>
+      <output id="OutputClause_1q3xiva" label="output" name="output" typeRef="string" />
+      <rule id="DecisionRule_0pg1cns">
+        <inputEntry id="UnaryTests_06i00zp">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0edkb52">
+          <text>"Testing"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_03d8lgk">
+          <text>"True Testing"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0yqb4gx">
+        <inputEntry id="UnaryTests_1tsoucv">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1q1z381">
+          <text>"Testing"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_180fg4b">
+          <text>"False Testing"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1vz8chw">
+        <inputEntry id="UnaryTests_0mjgz2k">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1i4hbl4">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1i4hmta">
+          <text>"Undefined"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram id="DMNDiagram_1js9pxb">
+      <dmndi:DMNShape id="DMNShape_0iy4ggv" dmnElementRef="decisionTestVariable">
+        <dc:Bounds height="80" width="180" x="270" y="400" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_1pbup8q" dmnElementRef="InformationRequirement_0lwte14">
+        <di:waypoint x="360" y="400" />
+        <di:waypoint x="360" y="360" />
+        <di:waypoint x="360" y="340" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape id="DMNShape_19vrddo" dmnElementRef="depedentVar">
+        <dc:Bounds height="80" width="180" x="270" y="260" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="DMNShape_1bmib9p" dmnElementRef="decisionTableBasedOnVariables">
+        <dc:Bounds height="80" width="180" x="530" y="300" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_0o9wni0" dmnElementRef="InformationRequirement_1o1t4g2">
+        <di:waypoint x="360" y="400" />
+        <di:waypoint x="620" y="400" />
+        <di:waypoint x="620" y="380" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNEdge id="DMNEdge_19wd2wz" dmnElementRef="InformationRequirement_14pk6do">
+        <di:waypoint x="450" y="300" />
+        <di:waypoint x="510" y="340" />
+        <di:waypoint x="530" y="340" />
+      </dmndi:DMNEdge>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

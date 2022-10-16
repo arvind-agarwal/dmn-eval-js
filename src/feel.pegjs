@@ -123,6 +123,7 @@ ArithmeticExpression
 	/ Subtraction
 	/ Multiplication
 	/ Division
+    / Mod
 	/ Exponentiation
 	/ ArithmeticNegation
 	/ BrackenedArithmeticExpression
@@ -138,6 +139,8 @@ SimpleExpression
 	= ArithmeticExpression
 	/ Comparison
 	/ SimpleValue
+    / TextualExpression
+    / BoxedExpression
 
 // 6.
 SimpleExpressions
@@ -275,6 +278,11 @@ Division
     = head:NonRecursiveSimpleExpressionForArithmeticExpression
     tail:(__ $("/") __ Expression)
     { return new ast.ArithmeticExpressionNode('/', head, tail[3], location()); }
+
+Mod
+    = head:NonRecursiveSimpleExpressionForArithmeticExpression
+    tail:(__ $("%") __ Expression)
+    { return new ast.ArithmeticExpressionNode('%', head, tail[3], location()); }
 
 // 25.
 Exponentiation

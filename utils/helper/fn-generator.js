@@ -341,7 +341,26 @@ const operatorMap = {
     }
     throw new Error(`${typeof x && x} / ${typeof y && y} : operation invalid for one or more operands types`);
   }),
-
+  '%': _.curry((x, y) => {
+    if (anyUndefined(x, y)) {
+      return getUndefined(x, y);
+    }
+    if (presence(x, y)) {
+      if (typeof x === 'number' && typeof y === 'number') {
+        return Number(Big(x).mod(y));
+      } if (x.isYmd && typeof y === 'number') {
+        return y === 0 ? null : valueInverseYMD(valueYMD(x) % y);
+      } if (typeof x === 'number' && y.isYmd) {
+        return x === 0 ? null : valueInverseYMD(valueYMD(y) % x);
+      } if (x.isDtd && typeof y === 'number') {
+        return y === 0 ? null : valueInverseDTD(valueDTD(x) % y);
+      } if (typeof x === 'number' && y.isDtd) {
+        return x === 0 ? null : valueInverseDTD(valueDTD(y) % x);
+      }
+      throw new Error(`${x.type || typeof x} / ${y.type || typeof y} : operation unsupported for one or more operands types`);
+    }
+    throw new Error(`${typeof x && x} / ${typeof y && y} : operation invalid for one or more operands types`);
+  }),
   '**': _.curry((x, y) => {
     if (anyUndefined(x, y)) {
       return getUndefined(x, y);
